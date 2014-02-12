@@ -8,11 +8,9 @@ static struct SWS_request_t {
 }; 
 
 void
-SWS_connect_init(struct SWS_request_t **request)
+SWS_connect_init()
 {
-	struct SWS_request_t *req = *request;
-
-	request = (struct SWS_request_t *)SWS_mmalloc(struct SWS_request_t);
+	
 }
 
 void
@@ -34,16 +32,12 @@ SWS_web_interation(int connect_fd)
 			exit(EXIT_SUCCESS);
 		}
 		
-		SWS_parse_request_header_line(recvline, request);
+		SWS_parse_request_header_line(recvline);
 	}
 } 		
 
 int
-SWS_parse_request_header_line(const char *header, struct SWS_request_t **request)
+SWS_parse_request_header_line(const char *header)
 {
-	struct SWS_request_t *req = *request;	
-
-	sprintf(header, "%s %s %s\r\n", req->method, req->url, req->version);
-
-	if (!strcmp(req->method, "GET"))
+	
 }

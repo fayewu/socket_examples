@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "error.h"
+#include "utils.h"
 
 /**
  * 将日志语句写入文件

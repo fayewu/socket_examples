@@ -61,8 +61,7 @@ SWS_service_start(int listen_fd)
 			close(connect_fd);
 		} else {
 			close(listen_fd);
-//			SWS_web_interation(connect_fd);
-				
+			SWS_web_interation(connect_fd);
 		}
 	}	
 }
