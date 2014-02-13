@@ -6,8 +6,12 @@
 
 #define  SWS_HEADER_LEN		1024		/* 预读1k */
 
+struct SWS_request_t **req;
+struct SWS_connect_t **con;
+
 typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
-typedef int (*SWS_parse_event)(const char *data, struct SWS_request_t **req);
+typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
+					struct SWS_connect_t **con);
 
 //#define GET		224		 
 //#define POST		326	
@@ -16,19 +20,21 @@ typedef int (*SWS_parse_event)(const char *data, struct SWS_request_t **req);
 //#define TRACE		367	 
 //#define OPTIONS	556 
 
-static struct SWS_connect_t {
+struct SWS_connect_t {
 	char *buffer;		
 	int buf_loc;
 
-	SWS_read_event *recv;	
-	SWS_parse_event *parse;
+	SWS_read_event recv;	
+	SWS_parse_event parse;
 };
 
-static struct SWS_request_t {
-	int method;	
+struct SWS_request_t {
+	char method[10];	
 	char *url;	/* TODO host的情况待考虑 */
-	int version;	/* TODO 待处理 */
+	char version[10];	/* TODO 待处理 */
 	int is_content;
 }; 
+
+extern void SWS_web_interation(int connect_fd);
 
 #endif

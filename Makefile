@@ -4,7 +4,7 @@ DEBUG_FLAGS = -g -Wall -DSWS_DEBUG
 SRC = src/
 
 TARGET = SWS
-OBJ = main.o log.o error.o socket.o config.o 
+OBJ = main.o log.o utils.o socket.o config.o interaction.o
 
 .PHONY: debug all clean
 
@@ -18,12 +18,14 @@ main.o: main.c
 	$(CC) $(CFLAGS) main.c
 log.o: log.c log.h
 	$(CC) $(CFLAGS) log.c
-error.o: error.c error.h
-	$(CC) $(CFLAGS) error.c
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) utils.c
 config.o: config.c config.h
 	$(CC) $(CFLAGS) config.c
 socket.o: socket.c socket.h
 	$(CC) $(CFLAGS) socket.c
+interaction.o: interaction.c interaction.h
+	$(CC) $(CFLAGS) interaction.c
 
 clean:
 	-rm *.o $(TARGET)

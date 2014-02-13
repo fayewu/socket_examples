@@ -1,5 +1,6 @@
-#include "socket.h"
 #include "log.h"
+#include "socket.h"
+#include "interaction.h"
 
 int
 SWS_listen(const int port, const char *address)
@@ -68,14 +69,14 @@ SWS_service_start(int listen_fd)
 
 /* ssize_t和size_t 是根据read的参数，可移植性*/
 ssize_t
-SWS_read_request_line(int fd, void *ptr, size_t maxlen)
+SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 {
-	char byte;
+	char c, *ptr = vptr;
 	ssize_t n, rc;	
 	int end_flag = 0;
 
 	for (n = 0; n < maxlen; n++) {
-		if (rc= read(fd, &c, 1) < 0) {
+		if ((rc = read(fd, &c, 1)) < 0) {
 			if (errno == EINTR) {
 				n--;
 				continue;
@@ -89,7 +90,7 @@ SWS_read_request_line(int fd, void *ptr, size_t maxlen)
 			if (end_flag == 1 && c!= '\n') {
 				end_flag = 0;
 			}
-			if (c == '\n' && end_flag = 1) {
+			if (c == '\n' && end_flag == 1) {
 				break;	
 			}
 		} else {
@@ -100,4 +101,29 @@ SWS_read_request_line(int fd, void *ptr, size_t maxlen)
 
 	*ptr = 0;
 	return n;
+}
+
+ssize_t
+SWS_read_header(int fd, void *vptr, size_t maxlen)
+{
+	int n, len;
+	char *ptr = vptr;
+	
+	n = read(fd, ptr, maxlen);
+
+	if (n <= 0) {
+		return n;
+	} else {
+		len = strlen(ptr) - 4;	
+		if (strcmp(&ptr[len], "\r\n\r\n")) {
+			return SWS_AGAIN;
+		}
+		return n;
+	}
+}
+
+ssize_t
+SWS_read_content(int fd, void *ptr, size_t maxlen)
+{
+	return 0;	
 }
