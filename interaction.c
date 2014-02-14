@@ -14,23 +14,21 @@ static void SWS_parse_content(char *header, struct SWS_request_t **request,
 
 
 void
-SWS_connect_init(struct SWS_request_t **request, struct SWS_connect_t **connect)
+SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)
 {
-	struct SWS_request_t *req = *request;
-	struct SWS_connect_t *con = *connect;
 
 	/* TODO memory_poll */
-	req = (struct SWS_request_t *)malloc(sizeof(struct SWS_request_t));
-	con = (struct SWS_connect_t *)malloc(sizeof(struct SWS_request_t));
+	(*req) = (struct SWS_request_t *)malloc(sizeof(struct SWS_request_t));
+	(*con) = (struct SWS_connect_t *)malloc(sizeof(struct SWS_request_t));
 
 	/* 1k magic number*/
-	memset(req, 0, sizeof(req));
-	con->buffer = (char *)malloc(SWS_HEADER_LEN);
-	con->buf_loc = 0;
+	memset(*req, 0, sizeof(*req));
+	(*con)->buffer = (char *)malloc(SWS_HEADER_LEN);
+	(*con)->buf_loc = 0;
 
 	/* 挂载读和解析事件 */
-	con->recv = SWS_read_request_line;
-	con->parse = SWS_parse_request_header_line;
+	(*con)->recv = SWS_read_request_line;
+	(*con)->parse = SWS_parse_request_header_line;
 }
 
 void
@@ -43,6 +41,9 @@ SWS_web_interation(int connect_fd)
 	SWS_connect_init(&req, &con);
 
 	for ( ;; )  {
+//		memset(con->buffer, 0, SWS_HEADER_LEN);
+//		n = SWS_read_request_line(connect_fd, &con->buffer[con->buf_loc],
+//				SWS_HEADER_LEN);	
 		n = con->recv(connect_fd, &con->buffer[con->buf_loc], 
 				SWS_HEADER_LEN);
 	
@@ -74,6 +75,7 @@ SWS_parse_request_header_line(char *header, struct SWS_request_t **request,
 	struct SWS_request_t *req = *request;	
 	struct SWS_connect_t *con = *connect;
 
+	printf("%s\n", header);
 	sprintf(header, "%s %s %s\r\n", req->method, req->url, req->version);
 
 	if (!strcmp(req->method, "POST") || !strcmp(req->method, "PUT")) {
@@ -96,6 +98,7 @@ SWS_parse_request_header(char *header, struct SWS_request_t **request,
 		con->recv = SWS_read_content;
 		con->parse = SWS_parse_content;
 	} else {
+		memset(con->buffer, 0, sizeof(SWS_HEADER_LEN));
 		con->recv = SWS_read_request_line;
 		con->parse = SWS_parse_request_header_line;
 	}

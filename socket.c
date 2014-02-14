@@ -73,31 +73,23 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 {
 	char c, *ptr = vptr;
 	ssize_t n, rc;	
-	int end_flag = 0;
 
-	for (n = 0; n < maxlen; n++) {
-		if ((rc = read(fd, &c, 1)) < 0) {
-			if (errno == EINTR) {
-				n--;
-				continue;
+	for (n = 1; n < maxlen; n++) {
+	again:
+		if ((rc = read(fd, &c, 1)) == 1) {
+			*ptr++ = c;
+			if (c == '\n') {
+				break;
 			}
-			return -1;
-		} else if (rc == 1){
-			*ptr++ = c;	
-			if (c == '\r') {
-				end_flag = 1;	
-			}
-			if (end_flag == 1 && c!= '\n') {
-				end_flag = 0;
-			}
-			if (c == '\n' && end_flag == 1) {
-				break;	
-			}
-		} else {
-			*ptr = 0;		
+		} else if (rc == 0) {
+			*ptr = 0;
 			return (n - 1);
+		} else {
+			if (errno == EINTR) {
+				goto again;
+			}
 		}
-	}
+	}	
 
 	*ptr = 0;
 	return n;
