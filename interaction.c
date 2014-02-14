@@ -75,8 +75,8 @@ SWS_parse_request_header_line(char *header, struct SWS_request_t **request,
 	struct SWS_request_t *req = *request;	
 	struct SWS_connect_t *con = *connect;
 
-	printf("%s\n", header);
-	sprintf(header, "%s %s %s\r\n", req->method, req->url, req->version);
+	sscanf(header, "%s %s %s\r\n", req->method, req->url, req->version);
+	printf("%s %s %s\n", req->method, req->url, req->version);
 
 	if (!strcmp(req->method, "POST") || !strcmp(req->method, "PUT")) {
 		req->is_content = True;										
