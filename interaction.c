@@ -3,6 +3,22 @@
 #include "socket.h"
 #include "interaction.h"
 
+static SWS_field_pt all_field[]  = {
+	{"Host", SWS_parse_host},
+	{"Connection", SWS_parse_connection}//,
+//	{"Accept", SWS_parse_accept},
+//	{"If", SWS_parse_if},
+//	{"Authorization", SWS_parse_authorization},
+//	{"From", SWS_parse_from},
+//	{"Expect", SWS_parse_expect},
+//	{"Max-Forwards", SWS_parse_max},
+//	{"Proxy-Authorization", SWS_parse_proxy},
+//	{"Range", SWS_parse_range},
+//	{"Referer", SWS_parse_Referer}
+//	{"TE", SWS_parse_TE}
+} 
+
+
 static void SWS_connect_init(struct SWS_request_t **request, 
 		struct SWS_connect_t **connect);
 static void SWS_parse_request_header_line(char *header, 
@@ -41,9 +57,6 @@ SWS_web_interation(int connect_fd)
 	SWS_connect_init(&req, &con);
 
 	for ( ;; )  {
-//		memset(con->buffer, 0, SWS_HEADER_LEN);
-//		n = SWS_read_request_line(connect_fd, &con->buffer[con->buf_loc],
-//				SWS_HEADER_LEN);	
 		n = con->recv(connect_fd, &con->buffer[con->buf_loc], 
 				SWS_HEADER_LEN);
 	
@@ -69,39 +82,56 @@ SWS_web_interation(int connect_fd)
 } 		
 
 void
-SWS_parse_request_header_line(char *header, struct SWS_request_t **request,
-		struct SWS_connect_t **connect)
+SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
+		struct SWS_connect_t **con)
 {
-	struct SWS_request_t *req = *request;	
-	struct SWS_connect_t *con = *connect;
+	struct SWS_request_t *r = *req;	
+	struct SWS_connect_t *c = *con;
 
-	sscanf(header, "%s %s %s\r\n", req->method, req->url, req->version);
-	printf("%s %s %s\n", req->method, req->url, req->version);
+	sscanf(header, "%s %s %s\r\n", r->method, r->url, r->version);
 
-	if (!strcmp(req->method, "POST") || !strcmp(req->method, "PUT")) {
-		req->is_content = True;										
+	if (!strcmp(r->method, "POST") || !strcmp(r->method, "PUT")) {
+		r->is_content = True;										
 	}	
 
 	/* 改变读和解析事件 */
-	con->recv = SWS_read_header;
-	con->parse = SWS_parse_request_header;
+	c->recv = SWS_read_header;
+	c->parse = SWS_parse_request_header;
 }
 
 void
-SWS_parse_request_header(char *header, struct SWS_request_t **request,
-		struct SWS_connect_t **connect)
+SWS_parse_request_header(char *header, struct SWS_request_t **req,
+		struct SWS_connect_t **con)
 {
-	struct SWS_request_t *req = *request;	
-	struct SWS_connect_t *con = *connect;
+	char *line;
+	struct SWS_request_t *r = *req;	
+	struct SWS_connect_t *c = *con;
 	
-	if (req->is_content) {
-		con->recv = SWS_read_content;
-		con->parse = SWS_parse_content;
+	line = strtok(header, CRLF);
+	for ( ;; ) {
+		if ((line = strtok(NULL, CRLF)) == NULL) {
+			break;	
+		}
+		SWS_parse_header_line(line);	
+	}		
+
+	if (r->is_content) {
+		c->recv = SWS_read_content;
+		c->parse = SWS_parse_content;
 	} else {
-		memset(con->buffer, 0, sizeof(SWS_HEADER_LEN));
-		con->recv = SWS_read_request_line;
-		con->parse = SWS_parse_request_header_line;
+		memset(c->buffer, 0, sizeof(SWS_HEADER_LEN));
+		c->recv = SWS_read_request_line;
+		c->parse = SWS_parse_request_header_line;
 	}
+}
+
+void
+SWS_parse_header_line(char *line)
+{
+	sscanf(line, "%s: %s", name, content);
+
+	if (strcmp(name, "Host"))
+		
 }
 
 void

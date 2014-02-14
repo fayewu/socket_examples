@@ -12,6 +12,7 @@ struct SWS_connect_t **con;
 typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
 typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
 					struct SWS_connect_t **con);
+typedef void (*SWS_field_pt)(char *name, char *content);
 
 //#define GET		224		 
 //#define POST		326	
@@ -19,6 +20,11 @@ typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
 //#define PUT		249	 
 //#define TRACE		367	 
 //#define OPTIONS	556 
+
+struct SWS_field {
+	char *name;	
+	SWS_field_pt  parse;
+};
 
 struct SWS_connect_t {
 	char *buffer;		
@@ -33,6 +39,7 @@ struct SWS_request_t {
 	char *url;	/* TODO host的情况待考虑 */
 	char version[10];	/* TODO 待处理 */
 	int is_content;
+	void *header;
 }; 
 
 extern void SWS_web_interation(int connect_fd);

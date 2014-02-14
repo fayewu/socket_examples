@@ -21,6 +21,10 @@
 #define True		1
 #define False		0
 
+#define CRLF		"\r\n"
+#define CR		"\r"
+#define LF		"\n"
+
 extern void user_info(const char *str);
 extern void user_info1(const char *format, ...);
 extern void user_exit(const char *str);
