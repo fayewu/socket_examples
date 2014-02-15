@@ -88,13 +88,13 @@ static void SWS_parse_content(char *header, struct SWS_request_t **request,
 void
 SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)
 {
-
 	/* TODO memory_poll */
 	(*req) = (struct SWS_request_t *)malloc(sizeof(struct SWS_request_t));
 	(*con) = (struct SWS_connect_t *)malloc(sizeof(struct SWS_request_t));
 
 	/* 1k magic number*/
 	memset(*req, 0, sizeof(*req));
+	memset(*con, 0, sizeof(*con));
 	(*con)->buffer = (char *)malloc(SWS_HEADER_LEN);
 	(*con)->buf_loc = 0;
 
@@ -141,18 +141,14 @@ void
 SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	struct SWS_request_t *r = *req;	
-	struct SWS_connect_t *c = *con;
+	struct SWS_request_t *r = *req;
 
+	r->url = (char *)malloc(strlen(header) + 1);	
 	sscanf(header, "%s %s %s\r\n", r->method, r->url, r->version);
 
 	if (!strcmp(r->method, "POST") || !strcmp(r->method, "PUT")) {
 		r->is_content = True;										
 	}	
-
-	if (r->url[0] != '/') {
-		r->is_aburl = True;		
-	}
 
 	/* 改变读和解析事件 */
 	c->recv = SWS_read_header;
@@ -201,7 +197,7 @@ SWS_parse_header_line(char *line, struct SWS_request_t **req)
 
 	for (i = 0; i < sizeof(SWS_all_field) / sizeof (SWS_all_field[0]); i++) {
 		if (!strcmp(name, SWS_all_field[i].name)) {
-			SWS_all_field[i].parse(name, content, nlen, clen, req);
+			SWS_all_field[i].parse(content, clen, req);
 				break;
 		}		
 	}		
@@ -209,28 +205,21 @@ SWS_parse_header_line(char *line, struct SWS_request_t **req)
 }
 
 void
-SWS_parse_host(char *name, char *content, int nlen, int clen, 
-		struct SWS_request_t **req)
+SWS_parse_host(char *content, int clen, struct SWS_request_t **req)
 {
-//	struct stat st;
-//	struct SWS_request_t *r = *req;
-//	char dir[strlen(r) + content + SWS_WEB_ROOT_LEN] = {0};
-//
-//	strcpy(dir, SWS_web_root);
-//	if (!r->is_aburl) {
-//		strcat(dir, content);
-//		strcat(dir, url);
-//	} else {
-//		strcat(dir, content);	
-//	}
-//
-//	if (stat(dir, s) < 0) {
-//		if (errno == ENOENT) {
-//			r->status = 				
-//		}	
-//	}				
+	/* not absolute url */
+	if ((*req)->url[0] != '/') {
+		return;		
+	}	
 
+	(*req)->host = (char *)malloc(strlen(content) + 1);	
 }
+
+//void
+//SWS_parse_connection(char *connect)
+//{
+//	
+//}
 
 void
 SWS_parse_content(char *header, struct SWS_request_t **request,
