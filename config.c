@@ -5,6 +5,7 @@ int SWS_port;
 int SWS_request_header; 
 const char *SWS_addr;
 const char *SWS_error_log;
+const char *web_root;
 
 /* create default configuration file */
 void
@@ -29,6 +30,10 @@ SWS_get_config()
 	if (!config_lookup_string(&cfg, "SWS_error_log", &SWS_error_log)) {
 		SWS_log_fatal("default configuration file has been changed,"
 				"No error_log!");
+	}
+	if (!config_lookup_string(&cfg, "SWS_web_root", &SWS_web_root)) {
+		SWS_log_fatal("default configuration file has been changed,"
+				"No web_root!");
 	}
 	if (!config_lookup_int(&cfg, "SWS_request_header", &SWS_request_header)) {
 		SWS_log_fatal("default configuration file has been changed,"

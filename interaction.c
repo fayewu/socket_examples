@@ -3,7 +3,7 @@
 #include "socket.h"
 #include "interaction.h"
 
-static SWS_field_pt all_field[]  = {
+static SWS_field_pt SWS_all_field[]  = {
 	{"Host", SWS_parse_host},
 	{"Connection", SWS_parse_connection}//,
 //	{"Accept", SWS_parse_accept},
@@ -16,7 +16,63 @@ static SWS_field_pt all_field[]  = {
 //	{"Range", SWS_parse_range},
 //	{"Referer", SWS_parse_Referer}
 //	{"TE", SWS_parse_TE}
-} 
+}; 
+
+char SWS_info_st[][SWS_STATUS_LEN] = {
+	"Continue",
+	"Switching Protocols"
+};
+
+char SWS_success_st[][SWS_STATUS_LEN] = {
+	"OK",
+	"Created",
+	"Accepted",
+	"Non-Authoritative information",
+	"No Content",
+	"Reset Content",
+	"Partial Content"
+};
+
+char SWS_redirect_st[][SWS_HEADER_LEN] = {
+	"Multiple Choices",
+	"Moved Permanently",
+	"Found",
+	"See Other",
+	"Not Modified",
+	"Use Proxy",
+	"Unused",
+	"Temporary Redirect"
+};
+
+char SWS_clierror_st[][SWS_HEADER_LEN] = {
+	"Bad Request",
+	"Unauthorized",
+	"Payment Required",
+	"Forbidden",
+	"Not Found",
+	"Method Not Allowed",
+	"Not Acceptable",
+	"Proxy Authentication Required",
+	"Request Timeout",
+	"Confilict",
+	"Gone",
+	"Length Required",
+	"Precondition Failed",
+	"Request Entity Too Large",
+	"Request-URI Too Long",
+	"Unsupported Media Type",
+	"Requested Range Not Satisfiable",
+	"Expectation Failed"
+};
+
+char SWS_sererror_st[][SWS_HEADER_LEN] = {
+	"Internal Server Error",
+	"Not Implemented",
+	"Bad Gateway",
+	"Service Unavailable",
+	"Gateway Timeout",
+	"HTTP version Not Supported"
+};
 
 
 static void SWS_connect_init(struct SWS_request_t **request, 
@@ -94,6 +150,10 @@ SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
 		r->is_content = True;										
 	}	
 
+	if (r->url[0] != '/') {
+		r->is_aburl = True;		
+	}
+
 	/* 改变读和解析事件 */
 	c->recv = SWS_read_header;
 	c->parse = SWS_parse_request_header;
@@ -112,7 +172,7 @@ SWS_parse_request_header(char *header, struct SWS_request_t **req,
 		if ((line = strtok(NULL, CRLF)) == NULL) {
 			break;	
 		}
-		SWS_parse_header_line(line);	
+		SWS_parse_header_line(line, req);	
 	}		
 
 	if (r->is_content) {
@@ -126,12 +186,50 @@ SWS_parse_request_header(char *header, struct SWS_request_t **req,
 }
 
 void
-SWS_parse_header_line(char *line)
+SWS_parse_header_line(char *line, struct SWS_request_t **req)
 {
-	sscanf(line, "%s: %s", name, content);
+	int i, nlen, clen;
+	char *name, *content = line;
 
-	if (strcmp(name, "Host"))
-		
+	for ( ; *content != ':'; *content++ ); 
+	name = line;
+	nlen = content - name;
+
+	/* 越过:和空格 */
+	content += 2;
+	clen = &line[strlen(line) - 1] - content + 1;
+
+	for (i = 0; i < sizeof(SWS_all_field) / sizeof (SWS_all_field[0]); i++) {
+		if (!strcmp(name, SWS_all_field[i].name)) {
+			SWS_all_field[i].parse(name, content, nlen, clen, req);
+				break;
+		}		
+	}		
+	/* TODO 自定义域 */
+}
+
+void
+SWS_parse_host(char *name, char *content, int nlen, int clen, 
+		struct SWS_request_t **req)
+{
+//	struct stat st;
+//	struct SWS_request_t *r = *req;
+//	char dir[strlen(r) + content + SWS_WEB_ROOT_LEN] = {0};
+//
+//	strcpy(dir, SWS_web_root);
+//	if (!r->is_aburl) {
+//		strcat(dir, content);
+//		strcat(dir, url);
+//	} else {
+//		strcat(dir, content);	
+//	}
+//
+//	if (stat(dir, s) < 0) {
+//		if (errno == ENOENT) {
+//			r->status = 				
+//		}	
+//	}				
+
 }
 
 void

@@ -3,16 +3,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-#define  SWS_HEADER_LEN		1024		/* 预读1k */
-
-struct SWS_request_t **req;
-struct SWS_connect_t **con;
-
-typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
-typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
-					struct SWS_connect_t **con);
-typedef void (*SWS_field_pt)(char *name, char *content);
+#define	SWS_HEADER_LEN			1024				/* 预读1k */
+#define	SWS_WEB_ROOT_LEN		sizeof(SWS_web_root) + 1
+#define SWS_STATUS_LEN			50
 
 //#define GET		224		 
 //#define POST		326	
@@ -20,6 +16,15 @@ typedef void (*SWS_field_pt)(char *name, char *content);
 //#define PUT		249	 
 //#define TRACE		367	 
 //#define OPTIONS	556 
+
+struct SWS_request_t **req;
+struct SWS_connect_t **con;
+
+typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
+typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
+					struct SWS_connect_t **con);
+typedef void (*SWS_field_pt)(char *name, char *content, int nlen, int clen,
+					struct SWS_request_t **req);
 
 struct SWS_field {
 	char *name;	
@@ -36,11 +41,23 @@ struct SWS_connect_t {
 
 struct SWS_request_t {
 	char method[10];	
-	char *url;	/* TODO host的情况待考虑 */
+	char url[SWS_HEADER_LEN];
 	char version[10];	/* TODO 待处理 */
+
+	/* flag field */
 	int is_content;
-	void *header;
+	int is_aburl;
+
+	/* use to write */
+	int status;
 }; 
+
+/* kinds of information of status */
+extern char SWS_info_st[][SWS_STATUS_LEN];
+extern char SWS_success_st[][SWS_STATUS_LEN]; 
+extern char SWS_redirect_st[][SWS_STATUS_LEN];
+extern char SWS_clierror_st[][SWS_STATUS_LEN];
+extern char SWS_sererror_st[][SWS_STATUS_LEN];
 
 extern void SWS_web_interation(int connect_fd);
 

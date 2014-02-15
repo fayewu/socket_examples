@@ -13,7 +13,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define SWS_AGAIN	-2
+#define SWS_AGAIN		-2
 
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start(int listen_fd);
