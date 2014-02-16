@@ -10,6 +10,12 @@
 #define	SWS_WEB_ROOT_LEN		sizeof(SWS_web_root) + 1
 #define SWS_STATUS_LEN			50
 
+#define SWS_ERROR			1
+#define SWS_OK				0
+
+#define SWS_CLOSE			1
+#define SWS_ALIVE			0
+
 //#define GET		224		 
 //#define POST		326	
 //#define HEAD		274
@@ -21,9 +27,9 @@ struct SWS_request_t **req;
 struct SWS_connect_t **con;
 
 typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
-typedef void (*SWS_parse_event)(char *data, struct SWS_request_t **req,
+typedef int (*SWS_parse_event)(char *data, struct SWS_request_t **req,
 					struct SWS_connect_t **con);
-typedef void (*SWS_field_pt)(char *content, int clen, struct SWS_request_t **req);
+typedef int (*SWS_field_pt)(char *content, int clen, struct SWS_request_t **req);
 
 struct SWS_field {
 	char *name;	
@@ -33,13 +39,14 @@ struct SWS_field {
 struct SWS_connect_t {
 	char *buffer;		
 	int buf_loc;
+	int read_len;
 
 	SWS_read_event recv;	
 	SWS_parse_event parse;
 
-	int is_read;
-	int is_parse;
-	int is_write;
+//	int is_read;
+//	int is_parse;
+//	int is_write;
 };
 
 struct SWS_request_t {
@@ -49,17 +56,15 @@ struct SWS_request_t {
 
 	struct SWS_header_t *header;
 
-//	/* flag field */
-//	int is_content;
-//	int is_aburl;
-//
-//	/* use to write */
-//	int status;
+	/* flags field */
+	int is_content;
+	int return_status; 
 }; 
 
 struct SWS_header_t {
 	char *host;		
 	int connection;
+	int content_len;
 };
 
 /* kinds of information of status */

@@ -115,7 +115,11 @@ SWS_read_header(int fd, void *vptr, size_t maxlen)
 }
 
 ssize_t
-SWS_read_content(int fd, void *ptr, size_t maxlen)
+SWS_read_content(int fd, void *vptr, size_t maxlen)
 {
+//	int n;
+//
+//	n = read(fd, vptrm maxlen);
+
 	return 0;	
 }

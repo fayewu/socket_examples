@@ -5,7 +5,8 @@
 
 static SWS_field_pt SWS_all_field[]  = {
 	{"Host", SWS_parse_host},
-	{"Connection", SWS_parse_connection}//,
+	{"Connection", SWS_parse_connection},
+	{"Content-Length", SWS_parse_content_length}//,
 //	{"Accept", SWS_parse_accept},
 //	{"If", SWS_parse_if},
 //	{"Authorization", SWS_parse_authorization},
@@ -97,6 +98,7 @@ SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)
 	memset(*con, 0, sizeof(*con));
 	(*con)->buffer = (char *)malloc(SWS_HEADER_LEN);
 	(*con)->buf_loc = 0;
+	(*con)->read_len = SWS_HEADER_LEN;
 
 	/* 挂载读和解析事件 */
 	(*con)->recv = SWS_read_request_line;
@@ -114,7 +116,7 @@ SWS_web_interation(int connect_fd)
 
 	for ( ;; )  {
 		n = con->recv(connect_fd, &con->buffer[con->buf_loc], 
-				SWS_HEADER_LEN);
+				con->read_len);
 	
 		if (n == 0) {
 			SWS_log_info("[%s:%d] client terminated prematurely",
@@ -137,25 +139,29 @@ SWS_web_interation(int connect_fd)
 	}
 } 		
 
-void
+int
 SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	struct SWS_request_t *r = *req;
+//	struct SWS_request_t *r = *req;
+//
+//	r->url = (char *)malloc(strlen(header) + 1);	
+//	sscanf(header, "%s %s %s\r\n", r->method, r->url, r->version);
+//
+//	if (!strcmp(r->method, "POST") || !strcmp(r->method, "PUT")) {
+//		r->is_content = True;										
+//	}	
 
-	r->url = (char *)malloc(strlen(header) + 1);	
-	sscanf(header, "%s %s %s\r\n", r->method, r->url, r->version);
-
-	if (!strcmp(r->method, "POST") || !strcmp(r->method, "PUT")) {
-		r->is_content = True;										
-	}	
+	// TODO parse url
 
 	/* 改变读和解析事件 */
 	c->recv = SWS_read_header;
 	c->parse = SWS_parse_request_header;
+
+	return SWS_OK;
 }
 
-void
+int
 SWS_parse_request_header(char *header, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
@@ -172,6 +178,10 @@ SWS_parse_request_header(char *header, struct SWS_request_t **req,
 	}		
 
 	if (r->is_content) {
+		c->read_len = r->content_len; 
+	}
+
+	if (r->is_content) {
 		c->recv = SWS_read_content;
 		c->parse = SWS_parse_content;
 	} else {
@@ -181,7 +191,7 @@ SWS_parse_request_header(char *header, struct SWS_request_t **req,
 	}
 }
 
-void
+int
 SWS_parse_header_line(char *line, struct SWS_request_t **req)
 {
 	int i, nlen, clen;
@@ -204,26 +214,52 @@ SWS_parse_header_line(char *line, struct SWS_request_t **req)
 	/* TODO 自定义域 */
 }
 
-void
+int
 SWS_parse_host(char *content, int clen, struct SWS_request_t **req)
 {
+	struct stat st;
+	
 	/* not absolute url */
 	if ((*req)->url[0] != '/') {
 		return;		
 	}	
-
 	(*req)->host = (char *)malloc(strlen(content) + 1);	
+
+	return SWS_ERROR;
 }
 
-//void
-//SWS_parse_connection(char *connect)
-//{
-//	
-//}
-
-void
-SWS_parse_content(char *header, struct SWS_request_t **request,
-		struct SWS_connect_t **connect)
+int
+SWS_parse_connection(char *content, int clen, struct SWS_request_t **req) 
 {
-	
+	if (!strcmp(content, "close")) {
+		(*req)->connection = SWS_CLOSE;	
+	} else if (!strcmp(content, "keep-alive")) {
+		(*req)->content = SWS_ALIVE;
+	} else {
+		return 400;
+	}
+
+	return SWS_OK;
 }
+
+int
+SWS_parse_content_length(char *content, int clen, struct SWS_request_t **req)
+{
+	int len; 
+
+	if (strlen(content) > 4) {
+		return 413;
+	}
+	while (*content != '\0') {
+		if (*content > '9' || *content < '0') {
+			return 400;	
+		} 
+	}
+	sscanf(content, "%d", len);
+	if (len > SWS_request_body) {
+		return 413;	
+	}
+
+	(*req)->content_len = len;
+	return SWS_OK;
+}	
