@@ -96,7 +96,7 @@ SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)
 	/* 1k magic number*/
 	memset(*req, 0, sizeof(*req));
 	memset(*con, 0, sizeof(*con));
-	(*con)->buffer = (char *)malloc(SWS_HEADER_LEN);
+	(*con)->buffer = malloc(SWS_HEADER_LEN);
 	(*con)->buf_loc = 0;
 	(*con)->read_len = SWS_HEADER_LEN;
 
@@ -123,9 +123,14 @@ SWS_web_interation(int connect_fd)
 					__FILE__, __LINE__);		
 			exit(EXIT_SUCCESS);
 		}
-
-		if (n < 0 && errno == EINTR) {
-			continue;
+	
+		if (n == -1) {
+			if (errno = EINTR) {
+				continue;
+			}
+			SWS_log_warn("[%s:%d] read error: %s", __FILE__,
+						__LINE__);
+			return;
 		}
 
 		/* update buffer's used size */
@@ -134,27 +139,33 @@ SWS_web_interation(int connect_fd)
 			continue;			
 		}
 
-		con->parse(con->buffer, &req, &con);
+		con->parse(con->buffer, con->buf_loc, &req, &con);
 
 	}
 } 		
 
 int
-SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
+SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-//	struct SWS_request_t *r = *req;
-//
-//	r->url = (char *)malloc(strlen(header) + 1);	
-//	sscanf(header, "%s %s %s\r\n", r->method, r->url, r->version);
-//
-//	if (!strcmp(r->method, "POST") || !strcmp(r->method, "PUT")) {
-//		r->is_content = True;										
-//	}	
+	void *tmp;
+	struct SWS_request_t *r = *req;
+	
+	if (header[len - 2] != CR || header[len - 1] != LF) {
+		return 414;	
+	}
+
+	for (tmp = header; tmp != header + len; tmp++) {
+		if (tmp == "_") {
+				
+		}
+	}
 
 	// TODO parse url
 
 	/* 改变读和解析事件 */
+	memset(c->buffer, 0, sizeof(buffer));
+	c->buf_loc = 0;
 	c->recv = SWS_read_header;
 	c->parse = SWS_parse_request_header;
 
@@ -162,7 +173,7 @@ SWS_parse_request_header_line(char *header, struct SWS_request_t **req,
 }
 
 int
-SWS_parse_request_header(char *header, struct SWS_request_t **req,
+SWS_parse_request_header(void *header, int hlen, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
 	char *line;
@@ -263,3 +274,10 @@ SWS_parse_content_length(char *content, int clen, struct SWS_request_t **req)
 	(*req)->content_len = len;
 	return SWS_OK;
 }	
+
+int
+SWS_parse_content(void *header, int hlen, struct SWS_request_t **req,
+		struct SWS_request_t **con)
+{
+	return 0;
+}

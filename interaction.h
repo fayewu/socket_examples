@@ -16,18 +16,19 @@
 #define SWS_CLOSE			1
 #define SWS_ALIVE			0
 
-//#define GET		224		 
-//#define POST		326	
-//#define HEAD		274
-//#define PUT		249	 
-//#define TRACE		367	 
-//#define OPTIONS	556 
+#define SWS_HTTP_GET			0
+#define SWS_HTTP_HEAD			1
+#define SWS_HTTP_POST			2
+#define SWS_HTTP_PUT			3
+#define SWS_HTTP_TRACE			4
+#define SWS_HTTP_OPTIONS		5
+#define SWS_HTTP_DELETE			6
 
 struct SWS_request_t **req;
 struct SWS_connect_t **con;
 
 typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
-typedef int (*SWS_parse_event)(char *data, struct SWS_request_t **req,
+typedef int (*SWS_parse_event)(void *data, int len, struct SWS_request_t **req,
 					struct SWS_connect_t **con);
 typedef int (*SWS_field_pt)(char *content, int clen, struct SWS_request_t **req);
 
@@ -37,7 +38,7 @@ struct SWS_field {
 };
 
 struct SWS_connect_t {
-	char *buffer;		
+	void *buffer;		
 	int buf_loc;
 	int read_len;
 
