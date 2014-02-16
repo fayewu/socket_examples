@@ -148,18 +148,53 @@ int
 SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	void *tmp;
-	struct SWS_request_t *r = *req;
+	enum line { 
+		method = 1,
+		url,
+		version
+	};
+	void *start = header, *end;
+	int status = 0, ret;
 	
-	if (header[len - 2] != CR || header[len - 1] != LF) {
-		return 414;	
-	}
+	for (end = header; end != header + len; end++) {
+		if (end == "_" || end == '\r') {
+			status += 1;	
+		}	
+		
+		switch (status) {
+		
+		case method:	
+			if ((ret = SWS_parse_method(start, end - start, 
+							req)) < 0) {
+				return ret;
+			}			
+			start = end + 1;
+			break;						
 
-	for (tmp = header; tmp != header + len; tmp++) {
-		if (tmp == "_") {
-				
+		case url:
+			if ((ret = SWS_parse_url(start, end - start,
+							req)) < 0) {
+				return ret;	
+			}
+			start = end + 1;
+			break;						
+		
+		case version:
+			if (end - start != SWS_HTTP_VERSION_LEN) {
+				return 400;
+			}
+
+			// TODO:版本局限1.1 
+			if (SWS_str_cmp8(start, "HTTP/1.1")) {
+				(*req)->version = SWS_HTTP_1_1; 
+			} else {
+				return 505;
+			}
+			break;
 		}
 	}
+
+	/* 判断停留在什么status */
 
 	// TODO parse url
 

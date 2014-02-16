@@ -16,6 +16,9 @@
 #define SWS_CLOSE			1
 #define SWS_ALIVE			0
 
+#define SWS_HTTP_VERSION_LEN		8
+#define SWS_HTTP_1_1			1
+
 #define SWS_HTTP_GET			0
 #define SWS_HTTP_HEAD			1
 #define SWS_HTTP_POST			2
