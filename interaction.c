@@ -78,10 +78,13 @@ char SWS_sererror_st[][SWS_HEADER_LEN] = {
 
 static void SWS_connect_init(struct SWS_request_t **request, 
 		struct SWS_connect_t **connect);
-static void SWS_parse_request_header_line(char *header, 
-	  	struct SWS_request_t **request, struct SWS_connect_t **connect);
-static void SWS_parse_request_header(char *header, 
-		struct SWS_request_t **request, struct SWS_connect_t **connect);
+
+static int SWS_parse_request_header_line(void *header, int len, 
+		struct SWS_request_t **req, struct SWS_connect_t **con);
+
+static int SWS_parse_request_header(void *header, int len, 
+		struct SWS_request_t **req, struct SWS_connect_t **con);
+
 static void SWS_parse_content(char *header, struct SWS_request_t **request,
 		struct SWS_connect_t **connect);
 
@@ -158,23 +161,21 @@ SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 	int status = 0, ret;
 	
 	for (end = header; end != header + len; end++) {
-		if (end == "_" || end == '\r') {
+		if (*end == "_" || *end == '\r') {
 			status += 1;	
 		}	
 		
 		switch (status) {
 		
 		case method:	
-			if ((ret = SWS_parse_method(start, end - start, 
-							req)) < 0) {
+			if ((ret = SWS_parse_method(start, end - start, req))) {
 				return ret;
 			}			
 			start = end + 1;
 			break;						
 
 		case url:
-			if ((ret = SWS_parse_url(start, end - start,
-							req)) < 0) {
+			if ((ret = SWS_parse_url(start, end - start, req))) {
 				return ret;	
 			}
 			start = end + 1;
@@ -262,20 +263,32 @@ SWS_parse_method(void *data, int len, struct SWS_request_t **req)
 }
 
 int
-SWS_parse_request_header(void *header, int hlen, struct SWS_request_t **req,
+SWS_parse_url(void *data, int len, struct SWS_request_t **req)
+{
+	return SWS_OK;	
+}
+
+int
+SWS_parse_request_header(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	char *line;
+	int ret
+	void *start = header, end;
 	struct SWS_request_t *r = *req;	
 	struct SWS_connect_t *c = *con;
 	
-	line = strtok(header, CRLF);
-	for ( ;; ) {
-		if ((line = strtok(NULL, CRLF)) == NULL) {
-			break;	
+	for (end = header; end != header + len; end++) {
+		if (*end == CR) {
+			if (*end++ != LF) {
+				return SWS_ERROR
+			}
+			if ((ret = SWS_parse_header_line(start, 
+						end - start - 1, req))) {
+				return ret;		
+			}
+			start = end + 1;
 		}
-		SWS_parse_header_line(line, req);	
-	}		
+	}
 
 	if (r->is_content) {
 		c->read_len = r->content_len; 
@@ -292,26 +305,27 @@ SWS_parse_request_header(void *header, int hlen, struct SWS_request_t **req,
 }
 
 int
-SWS_parse_header_line(char *line, struct SWS_request_t **req)
+SWS_parse_header_line(void *line, int len, struct SWS_request_t **req)
 {
-	int i, nlen, clen;
-	char *name, *content = line;
+	char *ptr, *end;
+	char *sline = (char *)line;
 
-	for ( ; *content != ':'; *content++ ); 
-	name = line;
-	nlen = content - name;
-
-	/* 越过:和空格 */
-	content += 2;
-	clen = &line[strlen(line) - 1] - content + 1;
-
-	for (i = 0; i < sizeof(SWS_all_field) / sizeof (SWS_all_field[0]); i++) {
-		if (!strcmp(name, SWS_all_field[i].name)) {
-			SWS_all_field[i].parse(content, clen, req);
-				break;
-		}		
-	}		
-	/* TODO 自定义域 */
+	for (ptr = sline; ptr != sline + len; ptr++) {
+		if (*ptr > 127 || *ptr < 0) {
+			return SWS_ERROR;		
+		}
+		if (*ptr == ":") {
+			end = ptr;
+		}
+	}
+	
+//	for (i = 0; i < sizeof(SWS_all_field) / sizeof (SWS_all_field[0]); i++) {
+//		if (!strncmp(sline, SWS_all_field[i].name)) {
+//			SWS_all_field[i].parse(content, clen, req);
+//				break;
+//		}		
+//	}		
+//	/* TODO 自定义域 */
 }
 
 int
