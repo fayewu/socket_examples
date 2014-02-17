@@ -149,7 +149,8 @@ SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
 	enum line { 
-		method = 1,
+		all = 0,		
+		method,
 		url,
 		version
 	};
@@ -181,22 +182,22 @@ SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 		
 		case version:
 			if (end - start != SWS_HTTP_VERSION_LEN) {
-				return 400;
+				return SWS_ERROR;
 			}
 
 			// TODO:版本局限1.1 
 			if (SWS_str_cmp8(start, "HTTP/1.1")) {
 				(*req)->version = SWS_HTTP_1_1; 
 			} else {
-				return 505;
+				return SWS_ERROR;
 			}
 			break;
 		}
 	}
 
-	/* 判断停留在什么status */
-
-	// TODO parse url
+	if (status < version) {
+		return SWS_ERROR;	
+	}
 
 	/* 改变读和解析事件 */
 	memset(c->buffer, 0, sizeof(buffer));
@@ -205,6 +206,59 @@ SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 	c->parse = SWS_parse_request_header;
 
 	return SWS_OK;
+}
+
+int
+SWS_parse_method(void *data, int len, struct SWS_request_t **req)
+{
+	switch (len) {
+	
+	case 3:
+		if (SWS_str_cmp3(data, "GET")) {
+			(*req)->method = SWS_HTTP_GET;
+		} else if (SWS_str_cmp3(data, "PUT")) {
+			(*req)->method = SWS_HTTP_PUT;
+		} else {
+			return SWS_ERROR;	
+		}
+		break;
+	case 4:
+		if (SWS_str_cmp4(data, "POST")) {
+			(*req)->method = SWS_HTTP_POST;
+		} else if (SWS_str_cmp4(data, "HEAD")) {
+			(*req)->method = SWS_HTTP_HEAD;
+		} else {
+			return SWS_ERROR;
+		}
+		break;
+
+	case 5:
+		if (SWS_str_cmp5(data, "TRACE")) {
+			(*req)->method = SWS_HTTP_TRACE;			
+		} else {
+			return SWS_ERROR;
+		}
+		break;
+
+	case 6:
+		if (SWS_str_cmp6(data, "DELETE")) {
+			(*req)->method = SWS_HTTP_DELETE;	
+		} else {
+			return SWS_ERROR;
+		}
+		break;
+
+	case 7:
+		if (SWS_str_cmp7(data, "OPTIONS")) {
+			(*req)->method = SWS_HTTP_OPTIONS;
+		} else {
+			return SWS_ERROR;
+		}
+		break;
+
+	default:
+		return SWS_ERROR;
+	}		
 }
 
 int

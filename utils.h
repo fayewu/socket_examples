@@ -25,6 +25,23 @@
 #define CR		"\r"
 #define LF		"\n"
 
+#define SWS_str_cmp3(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2]
+#define SWS_str_cmp4(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3]
+#define SWS_str_cmp5(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3]          \
+	&& a[4] == b[4]
+#define SWS_str_cmp6(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3]          \
+	&& a[4] == b[4] && a[5] == b[5]
+#define SWS_str_cmp7(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3]          \
+	&& a[4] == b[4] && a[5] == b[5] && a[6] == b[6]
+#define SWS_str_cmp8(a, b)						      \
+	a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3]          \
+	&& a[4] == b[4] && a[5] == b[5] && a[6] == b[6] && a[7] == b[7]
+
 extern void user_info(const char *str);
 extern void user_info1(const char *format, ...);
 extern void user_exit(const char *str);
