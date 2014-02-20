@@ -40,36 +40,38 @@ SWS_listen(const int port, const char *address)
 	return listen_fd;	
 }
 
-void
-SWS_service_start(int listen_fd)
-{
-	pid_t pid;
-	int connect_fd;
-	socklen_t clilen; 
-	struct sockaddr_in cliaddr;
-
-	while (1) {
-		clilen = sizeof(cliaddr);	
-		if ((connect_fd = accept(listen_fd, (struct sockaddr *)&cliaddr,
-				&clilen)) < 0) {
-			if (errno == EINTR) {
-				continue;
-			}
-			SWS_log_warn("[%s:%d] accept error: %s", __FILE__,
-					__LINE__, strerror(errno));
-		}	
-
-		if ((pid = fork()) < 0) {
-			SWS_log_fatal("[%s:%d] fork error : %s", __FILE__,
-					__LINE__, strerror(errno));
-		} else if (pid > 0) {
-			close(connect_fd);
-		} else {
-			close(listen_fd);
-			SWS_web_interation(connect_fd);
-		}
-	}	
-}
+//void
+//SWS_service_start()
+//{
+//	pid_t pid;
+//	int connect_fd, listen_fd;
+//	socklen_t clilen; 
+//	struct sockaddr_in cliaddr;
+//
+//	listen_fd = SWS_listen(SWS_port, SWS_addr);
+//
+//	while (1) {
+//		clilen = sizeof(cliaddr);	
+//		if ((connect_fd = accept(listen_fd, (struct sockaddr *)&cliaddr,
+//				&clilen)) < 0) {
+//			if (errno == EINTR) {
+//				continue;
+//			}
+//			SWS_log_warn("[%s:%d] accept error: %s", __FILE__,
+//					__LINE__, strerror(errno));
+//		}	
+//
+//		if ((pid = fork()) < 0) {
+//			SWS_log_fatal("[%s:%d] fork error : %s", __FILE__,
+//					__LINE__, strerror(errno));
+//		} else if (pid > 0) {
+//			close(connect_fd);
+//		} else {
+//			close(listen_fd);
+//			SWS_web_interation(connect_fd);
+//		}
+//	}	
+//}
 
 /* ssize_t和size_t 是根据read的参数，可移植性*/
 ssize_t
