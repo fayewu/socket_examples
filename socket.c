@@ -5,7 +5,8 @@
 int
 SWS_listen(const int port, const char *address)
 {
-	int listen_fd;
+	char *ptr;
+	int listen_fd, backlog;
 	struct sockaddr_in servaddr;
 
 	memset(&servaddr, 0, sizeof(servaddr));
@@ -28,7 +29,10 @@ SWS_listen(const int port, const char *address)
 				strerror(errno));	
 	}
 
-	if (listen(listen_fd, 10000) < 0) {
+	if ((ptr = getenv("LISTENQ")) != NULL) {
+		sscanf(ptr, "%d", &backlog);
+	}
+	if (listen(listen_fd, backlog) < 0) {
 		SWS_log_fatal("[%s:%d] %s", __FILE__, __LINE__,
 				strerror(errno));
 	}
