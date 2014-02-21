@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/select.h>
 
 extern void SWS_worker_init();
 
