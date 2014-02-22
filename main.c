@@ -8,25 +8,27 @@ static void sig_int(int signo);
 static void sig_child(int signo);
 
 void
-sig_int(int signo)
-{
-	SWS_log_info("[%s:%d] stupid web server end normally", __FILE__,
-			__LINE__);
-	SWS_log_end();
-	exit(EXIT_SUCCESS);		
-}
 
-void
-sig_child(int signo)
-{
-	pid_t pid;
-	int status;
-
-	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-		SWS_log_info("[%s:%d] child %d end normally", __FILE__,
-				__LINE__, pid);	
-	}
-}
+//void
+//sig_int(int signo)
+//{
+//	SWS_log_info("[%s:%d] stupid web server end normally", __FILE__,
+//			__LINE__);
+//	SWS_log_end();
+//	exit(EXIT_SUCCESS);		
+//}
+//
+//void
+//sig_child(int signo)
+//{
+//	pid_t pid;
+//	int status;
+//
+//	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+//		SWS_log_info("[%s:%d] child %d end normally", __FILE__,
+//				__LINE__, pid);	
+//	}
+//}
 
 int
 main(int argc, char *argv[])
