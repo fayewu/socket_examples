@@ -4,25 +4,18 @@
 #include "deal_connect.h"
 
 struct SWS_worker *worker = NULL;
-
-void
-sig_int(int signo){
-	int i;
-
-	for (i = 0; i < SWS_process_num; i++) {
-		kill(worker[i].pid, SIGTERM);	
-	}
-
-	SWS_log_info("[%s:%d] recive SIGINT", __FILE__, __LINE__);
-}
+int SWS_avail_process = SWS_process_num;
 
 void
 SWS_web_start()
 {
-	int listenfd, maxfd, i;
+	socklen_t clilen;
+	int listenfd, confd, maxfd, i, retval;
 	fd_set rset, masterset;
 	struct SWS_worker *worker;
+//	struct sockaddr_in cliaddr;
 
+//	clilen = sizeof(cliaddr); 
 	listenfd = SWS_listen(SWS_port, SWS_addr);
 	FD_ZERO(&masterset);
 	FD_SET(listenfd, &masterset);
@@ -32,6 +25,28 @@ SWS_web_start()
 
 	for (i = 0; i < SWS_process_num; i++) {
 		SWS_worker_init(i, worker, listenfd);
+		FD_SET(worker[i].pipefd, &masterset);
+		maxfd = max(listenfd, worker[i].pipefd);
+	}
+
+	for ( ;; ) {
+		rset = masterset;	
+		if (SWS_avail_process == 0) {
+			FD_CLR(listenfd, &rset);	
+		}
+		retval = select(maxfd + 1, &rset, NULL, NULL, NULL);
+
+		if (FD_ISSET(listenfd, &rset)) {
+//			if ((confd = accept(listenfd, (struct sockaddr *)cliaddr, 
+//						&clilen)) < 0) {
+//				if (errno == EINTR) {
+//					continue;
+//				}
+//				SWS_log_warn("[%s:%d] accept error: %s", __FILE__,
+//						__LINE__, strerror(errno));
+//				}	
+//			}
+		}
 	}
 }
 

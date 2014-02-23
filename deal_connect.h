@@ -13,6 +13,7 @@ struct SWS_worker {
 };
 
 extern SWS_worker *worker;
+extern int SWS_avail_process;
 
 extern void SWS_worker_init();
 
