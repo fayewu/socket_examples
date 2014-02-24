@@ -6,15 +6,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 
-struct SWS_worker {
-	pid_t pid;	
-	int pipefd;
-	int status;
-};
-
-extern SWS_worker *worker;
-extern int SWS_avail_process;
-
+extern pid_t pids[SWS_process_num];
 extern void SWS_worker_init();
 
 #endif
