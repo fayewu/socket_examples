@@ -3,7 +3,8 @@
 #include "socket.h"
 #include "deal_connect.h"
 
-pid_t pids[SWS_process_num]; 
+pid_t SWS_pids[SWS_process_num]; 
+static pthread_mutex_t *mptr;
 
 void
 SWS_web_start()
@@ -17,7 +18,7 @@ SWS_web_start()
 
 	SWS_lock_init();
 	for (i = 0; i < SWS_process_num; i++) {
-		pids[i] = SWS_worker_init(i, listenfd);	
+		SWS_pids[i] = SWS_worker_init(i, listenfd);	
 	}
 
 }
@@ -26,7 +27,36 @@ void
 SWS_lock_init(char *pathname)
 {
 	int fd;
-	pthread_mut
+	pthread_mutexattr_t mattr;
+
+	if (fd = mmap(0, sizeof(pthread_mutex_t), PROT_READ | PROX_WRITE,
+			MAP_SHARED, fd, 0) < 0) {
+		SWS_log_fatal("[%s:%d] mmap error: %s", __FILE__, __LINE__,
+				strerror(errno));	
+	}
+	close(fd);
+
+	if (pthread_mutexattr_init(&mattr) != 0) {
+		SWS_log_fatal("[%s:%d] mutexattr init error: %s", __FILE__,
+				__LINE__, strerror(errno));		
+	}
+	if (pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED) != 0) {
+		SWS_log_fatal("[%s:%d] mutexattr setshared init error: %s", 
+				__FILE__, __LINE__, strerror(errno));		
+	}
+	if (pthread_mutex_init(mptr, &mattr) != 0) {
+		SWS_log_fatal("[%s:%d] mutex init error: %s", __FILE__,
+				__LINE__, strerror(errno));		
+	}
+}
+
+void
+SWS_lock_wait()
+{
+	if (pthread_mutex_lock(mptr) != 0) {
+		SWS_log_fatal("[%s:%d] mutex lock error: %s", __FILE__,
+				__LINE__, strerror(errno));		
+	}	
 }
 
 pid_t

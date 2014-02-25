@@ -13,7 +13,7 @@ sig_int(int signo){
 	int i;
 
 	for (i = 0; i < SWS_process_num; i++) {
-		kill(worker[i].pid, SIGTERM);	
+		kill(SWS_pids[i], SIGTERM);	
 	}
 
 	SWS_log_info("[%s:%d] recive SIGINT", __FILE__, __LINE__);
