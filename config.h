@@ -9,8 +9,11 @@
 
 extern int SWS_port;
 extern int SWS_request_header;
+extern int SWS_request_body;
+extern int SWS_process_num;
 extern const char *SWS_addr;
 extern const char *SWS_error_log;
+extern const char *SWS_web_root;
 
 extern void SWS_get_config();
 

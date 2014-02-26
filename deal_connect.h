@@ -6,7 +6,9 @@
 #include <sys/select.h>
 #include <sys/types.h>
 
-extern pid_t SWS_pids[SWS_process_num];
+#include "config.h"
+
+extern pid_t *SWS_pids;
 
 extern void SWS_worker_init();
 

@@ -34,7 +34,7 @@ sig_child(int signo)
 int
 main(int argc, char *argv[])
 {
-//	struct sigaction sa_int, sa_child;
+	struct sigaction sa_int, sa_child;
 	
 	SWS_log_init();
 	SWS_get_config();	

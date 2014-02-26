@@ -142,7 +142,9 @@ SWS_web_interation(int connect_fd)
 			continue;			
 		}
 
-		con->parse(con->buffer, con->buf_loc, &req, &con);
+		printf("%s\n", con->buffer);
+
+//		con->parse(con->buffer, con->buf_loc, &req, &con);
 
 	}
 } 		
