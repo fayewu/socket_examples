@@ -6,6 +6,11 @@
 pid_t *SWS_pids; 
 static pthread_mutex_t *mptr;
 
+static void SWS_lock_init(char *pathname);
+static pid_t SWS_worker_init(int i, int listenfd);
+static void SWS_lock_wait();
+static void SWS_worker_wait_connect(int i, int listenfd);
+
 void
 SWS_web_start()
 {
@@ -15,7 +20,7 @@ SWS_web_start()
 	struct SWS_worker *worker;
 
 	listenfd = SWS_listen(SWS_port, SWS_addr);
-	
+	SWS_pids = (pid_t *)malloc(sizeof(pid_t) * SWS_process_num);	
 
 	SWS_lock_init();
 	for (i = 0; i < SWS_process_num; i++) {

@@ -54,7 +54,7 @@ main(int argc, char *argv[])
 				__LINE__);
 	}
 
-	SWS_service_start(listen_fd);
+	SWS_web_start();
 
 	return 0;
 }
