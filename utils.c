@@ -1,10 +1,10 @@
 #include "utils.h"
 
-void
-max(int listenfd, int pipefd)
-{
-	return (listen > pipefd ? listen : pipefd);		
-}
+//void
+//max(int listenfd, int pipefd)
+//{
+//	return (listenfd > pipefd ? listen : pipefd);		
+//}
 
 void
 user_info(const char *str)

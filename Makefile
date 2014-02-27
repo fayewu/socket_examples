@@ -13,7 +13,7 @@ debug: clean all
 
 
 all: $(OBJ)
-	$(CC) -o $(TARGET) $(OBJ) -lconfig
+	$(CC) -o $(TARGET) $(OBJ) -lconfig -lpthread
 main.o: main.c
 	$(CC) $(CFLAGS) main.c
 log.o: log.c log.h

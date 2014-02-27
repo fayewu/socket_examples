@@ -3,7 +3,32 @@
 #include "socket.h"
 #include "interaction.h"
 
-static SWS_field_pt SWS_all_field[]  = {
+static void SWS_connect_init(struct SWS_request_t **request, 
+		struct SWS_connect_t **connect);
+
+static int SWS_parse_request_header_line(void *header, int len, 
+		struct SWS_request_t **req, struct SWS_connect_t **con);
+
+static int SWS_parse_method(void *data, int len, struct SWS_request_t **req);
+
+static int SWS_parse_url(void *data, int len, struct SWS_request_t **req);
+
+static int SWS_parse_request_header(void *header, int len, 
+		struct SWS_request_t **req, struct SWS_connect_t **con);
+
+static int SWS_parse_host(char *data, int len, struct SWS_request_t **req);
+
+static int SWS_parse_connection(char *content, int clen, 
+		struct SWS_request_t **req);
+
+static int SWS_parse_content_length(char *content, int clen, 
+		struct SWS_request_t **req);
+
+static int SWS_parse_content(char *header, int hlen, struct SWS_request_t **req,
+		struct SWS_request_t **con);
+
+
+static struct SWS_field SWS_all_field[]  = {
 	{"Host", SWS_parse_host},
 	{"Connection", SWS_parse_connection},
 	{"Content-Length", SWS_parse_content_length}//,
@@ -34,7 +59,7 @@ char SWS_success_st[][SWS_STATUS_LEN] = {
 	"Partial Content"
 };
 
-char SWS_redirect_st[][SWS_HEADER_LEN] = {
+char SWS_redirect_st[][SWS_STATUS_LEN] = {
 	"Multiple Choices",
 	"Moved Permanently",
 	"Found",
@@ -45,7 +70,7 @@ char SWS_redirect_st[][SWS_HEADER_LEN] = {
 	"Temporary Redirect"
 };
 
-char SWS_clierror_st[][SWS_HEADER_LEN] = {
+char SWS_clierror_st[][SWS_STATUS_LEN] = {
 	"Bad Request",
 	"Unauthorized",
 	"Payment Required",
@@ -66,7 +91,7 @@ char SWS_clierror_st[][SWS_HEADER_LEN] = {
 	"Expectation Failed"
 };
 
-char SWS_sererror_st[][SWS_HEADER_LEN] = {
+char SWS_sererror_st[][SWS_STATUS_LEN] = {
 	"Internal Server Error",
 	"Not Implemented",
 	"Bad Gateway",
@@ -74,20 +99,6 @@ char SWS_sererror_st[][SWS_HEADER_LEN] = {
 	"Gateway Timeout",
 	"HTTP version Not Supported"
 };
-
-
-static void SWS_connect_init(struct SWS_request_t **request, 
-		struct SWS_connect_t **connect);
-
-static int SWS_parse_request_header_line(void *header, int len, 
-		struct SWS_request_t **req, struct SWS_connect_t **con);
-
-static int SWS_parse_request_header(void *header, int len, 
-		struct SWS_request_t **req, struct SWS_connect_t **con);
-
-static void SWS_parse_content(char *header, struct SWS_request_t **request,
-		struct SWS_connect_t **connect);
-
 
 void
 SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)
@@ -128,7 +139,7 @@ SWS_web_interation(int connect_fd)
 		}
 	
 		if (n == -1) {
-			if (errno = EINTR) {
+			if (errno == EINTR) {
 				continue;
 			}
 			SWS_log_warn("[%s:%d] read error: %s", __FILE__,
@@ -153,60 +164,60 @@ int
 SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	enum line { 
-		all = 0,		
-		method,
-		url,
-		version
-	};
-	void *start = header, *end;
-	int status = 0, ret;
-	
-	for (end = header; end != header + len; end++) {
-		if (*end == "_" || *end == '\r') {
-			status += 1;	
-		}	
-		
-		switch (status) {
-		
-		case method:	
-			if ((ret = SWS_parse_method(start, end - start, req))) {
-				return ret;
-			}			
-			start = end + 1;
-			break;						
-
-		case url:
-			if ((ret = SWS_parse_url(start, end - start, req))) {
-				return ret;	
-			}
-			start = end + 1;
-			break;						
-		
-		case version:
-			if (end - start != SWS_HTTP_VERSION_LEN) {
-				return SWS_ERROR;
-			}
-
-			// TODO:版本局限1.1 
-			if (SWS_str_cmp8(start, "HTTP/1.1")) {
-				(*req)->version = SWS_HTTP_1_1; 
-			} else {
-				return SWS_ERROR;
-			}
-			break;
-		}
-	}
-
-	if (status < version) {
-		return SWS_ERROR;	
-	}
-
-	/* 改变读和解析事件 */
-	memset(c->buffer, 0, sizeof(buffer));
-	c->buf_loc = 0;
-	c->recv = SWS_read_header;
-	c->parse = SWS_parse_request_header;
+//	enum line { 
+//		all = 0,		
+//		method,
+//		url,
+//		version
+//	};
+//	void *start = header, *end;
+//	int status = 0, ret;
+//	
+//	for (end = header; end != header + len; end++) {
+//		if (*end == "_" || *end == '\r') {
+//			status += 1;	
+//		}	
+//		
+//		switch (status) {
+//		
+//		case method:	
+//			if ((ret = SWS_parse_method(start, end - start, req))) {
+//				return ret;
+//			}			
+//			start = end + 1;
+//			break;						
+//
+//		case url:
+//			if ((ret = SWS_parse_url(start, end - start, req))) {
+//				return ret;	
+//			}
+//			start = end + 1;
+//			break;						
+//		
+//		case version:
+//			if (end - start != SWS_HTTP_VERSION_LEN) {
+//				return SWS_ERROR;
+//			}
+//
+//			// TODO:版本局限1.1 
+//			if (SWS_str_cmp8(start, "HTTP/1.1")) {
+//				(*req)->version = SWS_HTTP_1_1; 
+//			} else {
+//				return SWS_ERROR;
+//			}
+//			break;
+//		}
+//	}
+//
+//	if (status < version) {
+//		return SWS_ERROR;	
+//	}
+//
+//	/* 改变读和解析事件 */
+//	memset(c->buffer, 0, sizeof(buffer));
+//	c->buf_loc = 0;
+//	c->recv = SWS_read_header;
+//	c->parse = SWS_parse_request_header;
 
 	return SWS_OK;
 }
@@ -214,54 +225,56 @@ SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,
 int
 SWS_parse_method(void *data, int len, struct SWS_request_t **req)
 {
-	switch (len) {
+//	switch (len) {
+//	
+//	case 3:
+//		if (SWS_str_cmp3(data, "GET")) {
+//			(*req)->method = SWS_HTTP_GET;
+//		} else if (SWS_str_cmp3(data, "PUT")) {
+//			(*req)->method = SWS_HTTP_PUT;
+//		} else {
+//			return SWS_ERROR;	
+//		}
+//		break;
+//	case 4:
+//		if (SWS_str_cmp4(data, "POST")) {
+//			(*req)->method = SWS_HTTP_POST;
+//		} else if (SWS_str_cmp4(data, "HEAD")) {
+//			(*req)->method = SWS_HTTP_HEAD;
+//		} else {
+//			return SWS_ERROR;
+//		}
+//		break;
+//
+//	case 5:
+//		if (SWS_str_cmp5(data, "TRACE")) {
+//			(*req)->method = SWS_HTTP_TRACE;			
+//		} else {
+//			return SWS_ERROR;
+//		}
+//		break;
+//
+//	case 6:
+//		if (SWS_str_cmp6(data, "DELETE")) {
+//			(*req)->method = SWS_HTTP_DELETE;	
+//		} else {
+//			return SWS_ERROR;
+//		}
+//		break;
+//
+//	case 7:
+//		if (SWS_str_cmp7(data, "OPTIONS")) {
+//			(*req)->method = SWS_HTTP_OPTIONS;
+//		} else {
+//			return SWS_ERROR;
+//		}
+//		break;
+//
+//	default:
+//		return SWS_ERROR;
+//	}		
 	
-	case 3:
-		if (SWS_str_cmp3(data, "GET")) {
-			(*req)->method = SWS_HTTP_GET;
-		} else if (SWS_str_cmp3(data, "PUT")) {
-			(*req)->method = SWS_HTTP_PUT;
-		} else {
-			return SWS_ERROR;	
-		}
-		break;
-	case 4:
-		if (SWS_str_cmp4(data, "POST")) {
-			(*req)->method = SWS_HTTP_POST;
-		} else if (SWS_str_cmp4(data, "HEAD")) {
-			(*req)->method = SWS_HTTP_HEAD;
-		} else {
-			return SWS_ERROR;
-		}
-		break;
-
-	case 5:
-		if (SWS_str_cmp5(data, "TRACE")) {
-			(*req)->method = SWS_HTTP_TRACE;			
-		} else {
-			return SWS_ERROR;
-		}
-		break;
-
-	case 6:
-		if (SWS_str_cmp6(data, "DELETE")) {
-			(*req)->method = SWS_HTTP_DELETE;	
-		} else {
-			return SWS_ERROR;
-		}
-		break;
-
-	case 7:
-		if (SWS_str_cmp7(data, "OPTIONS")) {
-			(*req)->method = SWS_HTTP_OPTIONS;
-		} else {
-			return SWS_ERROR;
-		}
-		break;
-
-	default:
-		return SWS_ERROR;
-	}		
+	return SWS_ERROR;
 }
 
 int
@@ -274,52 +287,55 @@ int
 SWS_parse_request_header(void *header, int len, struct SWS_request_t **req,
 		struct SWS_connect_t **con)
 {
-	int ret
-	void *start = header, end;
-	struct SWS_request_t *r = *req;	
-	struct SWS_connect_t *c = *con;
-	
-	for (end = header; end != header + len; end++) {
-		if (*end == CR) {
-			if (*end++ != LF) {
-				return SWS_ERROR
-			}
-			if ((ret = SWS_parse_header_line(start, 
-						end - start - 1, req))) {
-				return ret;		
-			}
-			start = end + 1;
-		}
-	}
+//	int ret
+//	void *start = header, end;
+//	struct SWS_request_t *r = *req;	
+//	struct SWS_connect_t *c = *con;
+//	
+//	for (end = header; end != header + len; end++) {
+//		if (*end == CR) {
+//			if (*end++ != LF) {
+//				return SWS_ERROR
+//			}
+//			if ((ret = SWS_parse_header_line(start, 
+//						end - start - 1, req))) {
+//				return ret;		
+//			}
+//			start = end + 1;
+//		}
+//	}
+//
+//	if (r->is_content) {
+//		c->read_len = r->content_len; 
+//	}
+//
+//	if (r->is_content) {
+//		c->recv = SWS_read_content;
+//		c->parse = SWS_parse_content;
+//	} else {
+//		memset(c->buffer, 0, sizeof(SWS_HEADER_LEN));
+//		c->recv = SWS_read_request_line;
+//		c->parse = SWS_parse_request_header_line;
+//	}
 
-	if (r->is_content) {
-		c->read_len = r->content_len; 
-	}
-
-	if (r->is_content) {
-		c->recv = SWS_read_content;
-		c->parse = SWS_parse_content;
-	} else {
-		memset(c->buffer, 0, sizeof(SWS_HEADER_LEN));
-		c->recv = SWS_read_request_line;
-		c->parse = SWS_parse_request_header_line;
-	}
+//	//add
+	return SWS_OK;
 }
 
 int
 SWS_parse_header_line(void *line, int len, struct SWS_request_t **req)
 {
-	char *ptr, *end;
-	char *sline = (char *)line;
-
-	for (ptr = sline; ptr != sline + len; ptr++) {
-		if (*ptr > 127 || *ptr < 0) {
-			return SWS_ERROR;		
-		}
-		if (*ptr == ":") {
-			end = ptr;
-		}
-	}
+//	char *ptr, *end;
+//	char *sline = (char *)line;
+//
+//	for (ptr = sline; ptr != sline + len; ptr++) {
+//		if (*ptr > 127 || *ptr < 0) {
+//			return SWS_ERROR;		
+//		}
+//		if (*ptr == ":") {
+//			end = ptr;
+//		}
+//	}
 	
 //	for (i = 0; i < sizeof(SWS_all_field) / sizeof (SWS_all_field[0]); i++) {
 //		if (!strncmp(sline, SWS_all_field[i].name)) {
@@ -328,60 +344,62 @@ SWS_parse_header_line(void *line, int len, struct SWS_request_t **req)
 //		}		
 //	}		
 //	/* TODO 自定义域 */
+//	//add
+	return SWS_ERROR;
 }
 
 int
 SWS_parse_host(char *content, int clen, struct SWS_request_t **req)
 {
-	struct stat st;
-	
-	/* not absolute url */
-	if ((*req)->url[0] != '/') {
-		return;		
-	}	
-	(*req)->host = (char *)malloc(strlen(content) + 1);	
-
+//	struct stat st;
+//	
+//	/* not absolute url */
+//	if ((*req)->url[0] != '/') {
+//		return;		
+//	}	
+//	(*req)->host = (char *)malloc(strlen(content) + 1);	
+//
 	return SWS_ERROR;
 }
 
 int
 SWS_parse_connection(char *content, int clen, struct SWS_request_t **req) 
 {
-	if (!strcmp(content, "close")) {
-		(*req)->connection = SWS_CLOSE;	
-	} else if (!strcmp(content, "keep-alive")) {
-		(*req)->content = SWS_ALIVE;
-	} else {
-		return 400;
-	}
-
+//	if (!strcmp(content, "close")) {
+//		(*req)->connection = SWS_CLOSE;	
+//	} else if (!strcmp(content, "keep-alive")) {
+//		(*req)->content = SWS_ALIVE;
+//	} else {
+//		return 400;
+//	}
+//
 	return SWS_OK;
 }
 
 int
 SWS_parse_content_length(char *content, int clen, struct SWS_request_t **req)
 {
-	int len; 
-
-	if (strlen(content) > 4) {
-		return 413;
-	}
-	while (*content != '\0') {
-		if (*content > '9' || *content < '0') {
-			return 400;	
-		} 
-	}
-	sscanf(content, "%d", len);
-	if (len > SWS_request_body) {
-		return 413;	
-	}
-
-	(*req)->content_len = len;
+//	int len; 
+//
+//	if (strlen(content) > 4) {
+//		return 413;
+//	}
+//	while (*content != '\0') {
+//		if (*content > '9' || *content < '0') {
+//			return 400;	
+//		} 
+//	}
+//	sscanf(content, "%d", len);
+//	if (len > SWS_request_body) {
+//		return 413;	
+//	}
+//
+//	(*req)->content_len = len;
 	return SWS_OK;
 }	
 
 int
-SWS_parse_content(void *header, int hlen, struct SWS_request_t **req,
+SWS_parse_content(char *header, int hlen, struct SWS_request_t **req,
 		struct SWS_request_t **con)
 {
 	return 0;

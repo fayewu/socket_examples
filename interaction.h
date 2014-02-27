@@ -33,7 +33,7 @@ struct SWS_connect_t **con;
 typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	
 typedef int (*SWS_parse_event)(void *data, int len, struct SWS_request_t **req,
 					struct SWS_connect_t **con);
-typedef int (*SWS_field_pt)(char *content, int clen, struct SWS_request_t **req);
+typedef int (*SWS_field_pt)(char *data, int len, struct SWS_request_t **req);
 
 struct SWS_field {
 	char *name;	
@@ -41,7 +41,7 @@ struct SWS_field {
 };
 
 struct SWS_connect_t {
-	void *buffer;		
+	char *buffer;		
 	int buf_loc;
 	int read_len;
 
