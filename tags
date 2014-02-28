@@ -4,26 +4,58 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-BUF_LEN	error.h	12;"	d
+BUF_LEN	utils.h	13;"	d
 CC	Makefile	/^CC = gcc$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -c$/;"	m
+CR	utils.h	25;"	d
+CRLF	utils.h	24;"	d
 DEBUG_FLAGS	Makefile	/^DEBUG_FLAGS = -g -Wall -DSWS_DEBUG$/;"	m
-DEBUG_INFO	error.h	15;"	d
-DEBUG_INFO	error.h	17;"	d
+DEBUG_INFO	utils.h	16;"	d
+DEBUG_INFO	utils.h	18;"	d
 DEFAULT_FILE	config.h	8;"	d
+False	utils.h	22;"	d
+LF	utils.h	26;"	d
 LOG_DEBUG	log.h	16;"	d
 LOG_ERROR	log.h	13;"	d
 LOG_FATAL	log.h	12;"	d
 LOG_INFO	log.h	15;"	d
 LOG_WARN	log.h	14;"	d
 Malloc	memory_poll.c	/^Malloc(size_t size)$/;"	f
-OBJ	Makefile	/^OBJ = main.o log.o error.o socket.o config.o $/;"	m
+OBJ	Makefile	/^OBJ = main.o log.o utils.o socket.o config.o interaction.o deal_connect.o$/;"	m
 SRC	Makefile	/^SRC = src\/$/;"	m
+SWS_	socket.h	17;"	d
+SWS_AGAIN	socket.h	16;"	d
+SWS_ALIVE	interaction.h	17;"	d
+SWS_CLOSE	interaction.h	16;"	d
+SWS_ERROR	interaction.h	13;"	d
+SWS_HEADER_LEN	interaction.h	9;"	d
+SWS_HTTP_1_1	interaction.h	20;"	d
+SWS_HTTP_DELETE	interaction.h	28;"	d
+SWS_HTTP_GET	interaction.h	22;"	d
+SWS_HTTP_HEAD	interaction.h	23;"	d
+SWS_HTTP_OPTIONS	interaction.h	27;"	d
+SWS_HTTP_POST	interaction.h	24;"	d
+SWS_HTTP_PUT	interaction.h	25;"	d
+SWS_HTTP_TRACE	interaction.h	26;"	d
+SWS_HTTP_VERSION_LEN	interaction.h	19;"	d
 SWS_LOG_PATH	log.h	18;"	d
+SWS_OK	interaction.h	14;"	d
+SWS_STATUS_LEN	interaction.h	11;"	d
+SWS_WEB_ROOT_LEN	interaction.h	10;"	d
 SWS_addr	config.c	/^const char *SWS_addr;$/;"	v
+SWS_all_field	interaction.c	/^static struct SWS_field SWS_all_field[]  = {$/;"	v	typeref:struct:SWS_field	file:
+SWS_clierror_st	interaction.c	/^char SWS_clierror_st[][SWS_STATUS_LEN] = {$/;"	v
+SWS_connect_init	interaction.c	/^SWS_connect_init(struct SWS_request_t **req, struct SWS_connect_t **con)$/;"	f
+SWS_connect_t	interaction.h	/^struct SWS_connect_t {$/;"	s
 SWS_error_log	config.c	/^const char *SWS_error_log;$/;"	v
+SWS_field	interaction.h	/^struct SWS_field {$/;"	s
+SWS_field_pt	interaction.h	/^typedef int (*SWS_field_pt)(char *data, int len, struct SWS_request_t **req);$/;"	t
 SWS_get_config	config.c	/^SWS_get_config()$/;"	f
+SWS_header_t	interaction.h	/^struct SWS_header_t {$/;"	s
+SWS_info_st	interaction.c	/^char SWS_info_st[][SWS_STATUS_LEN] = {$/;"	v
 SWS_listen	socket.c	/^SWS_listen(const int port, const char *address)$/;"	f
+SWS_lock_init	deal_connect.c	/^SWS_lock_init()$/;"	f
+SWS_lock_wait	deal_connect.c	/^SWS_lock_wait()$/;"	f
 SWS_log_debug	log.c	/^SWS_log_debug(const char *format, ...)$/;"	f
 SWS_log_end	log.c	/^SWS_log_end()$/;"	f
 SWS_log_error	log.c	/^SWS_log_error(const char *format, ...)$/;"	f
@@ -34,44 +66,99 @@ SWS_log_info	log.c	/^SWS_log_info(const char *format, ...)$/;"	f
 SWS_log_init	log.c	/^SWS_log_init()$/;"	f
 SWS_log_to_file	log.c	/^SWS_log_to_file(int level, const char *log)$/;"	f	file:
 SWS_log_warn	log.c	/^SWS_log_warn(const char *format, ...)$/;"	f
-SWS_parse_request_header_line	interaction.c	/^SWS_parse_request_header_line()$/;"	f
+SWS_parse_connection	interaction.c	/^SWS_parse_connection(char *content, int clen, struct SWS_request_t **req) $/;"	f
+SWS_parse_content	interaction.c	/^SWS_parse_content(char *header, int hlen, struct SWS_request_t **req,$/;"	f
+SWS_parse_content_length	interaction.c	/^SWS_parse_content_length(char *content, int clen, struct SWS_request_t **req)$/;"	f
+SWS_parse_event	interaction.h	/^typedef int (*SWS_parse_event)(void *data, int len, struct SWS_request_t **req,$/;"	t
+SWS_parse_header_line	interaction.c	/^SWS_parse_header_line(void *line, int len, struct SWS_request_t **req)$/;"	f
+SWS_parse_host	interaction.c	/^SWS_parse_host(char *content, int clen, struct SWS_request_t **req)$/;"	f
+SWS_parse_method	interaction.c	/^SWS_parse_method(void *data, int len, struct SWS_request_t **req)$/;"	f
+SWS_parse_request_header	interaction.c	/^SWS_parse_request_header(void *header, int len, struct SWS_request_t **req,$/;"	f
+SWS_parse_request_header_line	interaction.c	/^SWS_parse_request_header_line(void *header, int len, struct SWS_request_t **req,$/;"	f
+SWS_parse_url	interaction.c	/^SWS_parse_url(void *data, int len, struct SWS_request_t **req)$/;"	f
+SWS_pids	deal_connect.c	/^pid_t *SWS_pids; $/;"	v
 SWS_port	config.c	/^int SWS_port;$/;"	v
-SWS_read_request_line	socket.c	/^SWS_read_request_line(int fd, void *ptr, size_t maxlen)$/;"	f
+SWS_process_num	config.c	/^int SWS_process_num;$/;"	v
+SWS_read_content	socket.c	/^SWS_read_content(int fd, void *vptr, size_t maxlen)$/;"	f
+SWS_read_event	interaction.h	/^typedef	ssize_t (*SWS_read_event)(int sockfd, void *ptr, size_t len);	$/;"	t
+SWS_read_header	socket.c	/^SWS_read_header(int fd, void *vptr, size_t maxlen)$/;"	f
+SWS_read_request_line	socket.c	/^SWS_read_request_line(int fd, void *vptr, size_t maxlen)$/;"	f
+SWS_redirect_st	interaction.c	/^char SWS_redirect_st[][SWS_STATUS_LEN] = {$/;"	v
+SWS_request_body	config.c	/^int SWS_request_body;$/;"	v
 SWS_request_header	config.c	/^int SWS_request_header; $/;"	v
-SWS_request_t	interaction.c	/^static struct SWS_request_t {$/;"	s	file:
-SWS_service_start	socket.c	/^SWS_service_start(int listen_fd)$/;"	f
+SWS_request_t	interaction.h	/^struct SWS_request_t {$/;"	s
+SWS_sererror_st	interaction.c	/^char SWS_sererror_st[][SWS_STATUS_LEN] = {$/;"	v
+SWS_str_cmp3	utils.h	28;"	d
+SWS_str_cmp4	utils.h	30;"	d
+SWS_str_cmp5	utils.h	32;"	d
+SWS_str_cmp6	utils.h	35;"	d
+SWS_str_cmp7	utils.h	38;"	d
+SWS_str_cmp8	utils.h	41;"	d
+SWS_success_st	interaction.c	/^char SWS_success_st[][SWS_STATUS_LEN] = {$/;"	v
 SWS_web_interation	interaction.c	/^SWS_web_interation(int connect_fd)$/;"	f
+SWS_web_root	config.c	/^const char *SWS_web_root;$/;"	v
+SWS_web_start	deal_connect.c	/^SWS_web_start()$/;"	f
+SWS_worker_init	deal_connect.c	/^SWS_worker_init(int i, int listenfd)$/;"	f
+SWS_worker_wait_connect	deal_connect.c	/^SWS_worker_wait_connect(int i, int listenfd)$/;"	f
 TARGET	Makefile	/^TARGET = SWS$/;"	m
+True	utils.h	21;"	d
 _CONFIG_H	config.h	2;"	d
+_DEAL_CONNECT_H	deal_connect.h	2;"	d
 _INTERACTION_H	interaction.h	2;"	d
 _LOG_H	log.h	2;"	d
 _MEMORY_POLL_H	memory_poll.h	2;"	d
 _SOCKET_H	socket.h	2;"	d
-_UTILS_H	error.h	2;"	d
-accept_type	interaction.c	/^	int accept_type;$/;"	m	struct:SWS_request_t	file:
+_UTILS_H	utils.h	2;"	d
+_WRAPPER_FUNC_H	wrapper_func.c	2;"	d	file:
 apply_memory_block	memory_poll.c	/^apply_memory_block(size_t size)$/;"	f
 begin	memory_poll.h	/^	void *begin;	$/;"	m	struct:memory_poll_block
 begin	memory_poll.h	/^	void *begin;$/;"	m	struct:memory_unit
 block_head	memory_poll.c	/^static struct memory_poll_block *block_head = NULL; $/;"	v	typeref:struct:memory_poll_block	file:
 block_length	memory_poll.h	7;"	d
-err_exit	error.c	/^err_exit(const char *str)$/;"	f
-err_exit1	error.c	/^err_exit1(const char *format, ...)$/;"	f
-err_info	error.c	/^err_info(const char *str)$/;"	f
+buf_loc	interaction.h	/^	int buf_loc;$/;"	m	struct:SWS_connect_t
+buffer	interaction.h	/^	char *buffer;		$/;"	m	struct:SWS_connect_t
+con	interaction.h	/^struct SWS_connect_t **con;$/;"	v	typeref:struct:SWS_connect_t
+connection	interaction.h	/^	int connection;$/;"	m	struct:SWS_header_t
+content_len	interaction.h	/^	int content_len;$/;"	m	struct:SWS_header_t
+err_exit	utils.c	/^err_exit(const char *str)$/;"	f
+err_exit1	utils.c	/^err_exit1(const char *format, ...)$/;"	f
+err_info	utils.c	/^err_info(const char *str)$/;"	f
+f	test.c	/^	func_t f;$/;"	m	struct:foo	file:
+foo	test.c	/^struct foo {$/;"	s	file:
 free	memory_poll.h	/^	struct memory_unit *free;$/;"	m	struct:memory_poll_block	typeref:struct:memory_poll_block::memory_unit
+func1	test.c	/^func1()$/;"	f
+func2	test.c	/^func2()$/;"	f
+func_t	test.c	/^typedef void (*func_t)(void); $/;"	t	file:
+header	interaction.h	/^	struct SWS_header_t *header;$/;"	m	struct:SWS_request_t	typeref:struct:SWS_request_t::SWS_header_t
+host	interaction.h	/^	char *host;		$/;"	m	struct:SWS_header_t
+is_content	interaction.h	/^	int is_content;$/;"	m	struct:SWS_request_t
 main	main.c	/^main(int argc, char *argv[])$/;"	f
+main	test.c	/^main()$/;"	f
 main	test_mpoll.c	/^main()$/;"	f
 memory_malloc	memory_poll.c	/^memory_malloc(size_t size)$/;"	f
 memory_poll_block	memory_poll.h	/^struct memory_poll_block {$/;"	s
 memory_poll_free	memory_poll.c	/^memory_poll_free()$/;"	f
 memory_poll_init	memory_poll.c	/^memory_poll_init()$/;"	f
 memory_unit	memory_poll.h	/^struct memory_unit {$/;"	s
-method	interaction.c	/^	int method;	$/;"	m	struct:SWS_request_t	file:
+method	interaction.h	/^	char method[10];	$/;"	m	struct:SWS_request_t
+mptr	deal_connect.c	/^static pthread_mutex_t *mptr;$/;"	v	file:
+name	interaction.h	/^	char *name;	$/;"	m	struct:SWS_field
+name	test.c	/^	char *name;	$/;"	m	struct:foo	file:
 next	memory_poll.h	/^	struct memory_poll_block *next;$/;"	m	struct:memory_poll_block	typeref:struct:memory_poll_block::memory_poll_block
+parse	interaction.h	/^	SWS_field_pt  parse;$/;"	m	struct:SWS_field
+parse	interaction.h	/^	SWS_parse_event parse;$/;"	m	struct:SWS_connect_t
+read_len	interaction.h	/^	int read_len;$/;"	m	struct:SWS_connect_t
+recv	interaction.h	/^	SWS_read_event recv;	$/;"	m	struct:SWS_connect_t
+req	interaction.h	/^struct SWS_request_t **req;$/;"	v	typeref:struct:SWS_request_t
+return_status	interaction.h	/^	int return_status; $/;"	m	struct:SWS_request_t
 sig_child	main.c	/^sig_child(int signo)$/;"	f
-sig_int	main.c	/^sig_int(int signo)$/;"	f
+sig_int	main.c	/^sig_int(int signo){$/;"	f
 size	memory_poll.h	/^	size_t size;$/;"	m	struct:memory_unit
-url	interaction.c	/^	char *url;$/;"	m	struct:SWS_request_t	file:
-user_exit	error.c	/^user_exit(const char *str)$/;"	f
-user_exit1	error.c	/^user_exit1(const char *format, ...)$/;"	f
-user_info	error.c	/^user_info(const char *str)$/;"	f
-user_info1	error.c	/^user_info1(const char *format, ...)$/;"	f
+sock	test/get_status.py	/^sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)$/;"	v
+test	test.c	/^struct foo test[] =  {$/;"	v	typeref:struct:foo
+url	interaction.h	/^	char *url;$/;"	m	struct:SWS_request_t
+user_exit	utils.c	/^user_exit(const char *str)$/;"	f
+user_exit1	utils.c	/^user_exit1(const char *format, ...)$/;"	f
+user_info	utils.c	/^user_info(const char *str)$/;"	f
+user_info1	utils.c	/^user_info1(const char *format, ...)$/;"	f
+version	interaction.h	/^	char version[10];	\/* TODO 待处理 *\/$/;"	m	struct:SWS_request_t

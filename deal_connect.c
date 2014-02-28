@@ -24,7 +24,6 @@ SWS_web_start()
 	SWS_lock_init();
 	for (i = 0; i < SWS_process_num; i++) {
 		SWS_pids[i] = SWS_worker_init(i, listenfd);	
-
 	}
 
 }
@@ -89,6 +88,8 @@ SWS_worker_wait_connect(int i, int listenfd)
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 
+	// test
+	printf("wait connect\n");
 	for ( ;; ) {
 		SWS_lock_wait();
 		if ((connfd = accept(listenfd, (struct sockaddr *)&cliaddr, 
@@ -102,6 +103,4 @@ SWS_worker_wait_connect(int i, int listenfd)
 
 		SWS_web_interation(connfd);
 	}
-
-	return 0;
 }

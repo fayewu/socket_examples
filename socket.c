@@ -6,6 +6,7 @@ int
 SWS_listen(const int port, const char *address)
 {
 	char *ptr;
+	int reuse = 1;
 	int listen_fd, backlog;
 	struct sockaddr_in servaddr;
 
@@ -14,13 +15,18 @@ SWS_listen(const int port, const char *address)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
 	if (inet_aton(address, &servaddr.sin_addr)) {
-		SWS_log_fatal("[%s:%d] %s", __FILE__, __LINE__, 
-				strerror(errno));
+		SWS_log_fatal("[%s:%d] inet_aton error: %s", 
+				__FILE__, __LINE__, strerror(errno));
 	}
 
 	if ((listen_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		SWS_log_fatal("[%s:%d] %s", __FILE__, __LINE__, 
-				strerror(errno));	
+		SWS_log_fatal("[%s:%d] socket error: %s", 
+				__FILE__, __LINE__, strerror(errno));	
+	}
+	if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, 
+				sizeof(reuse)) < 0) {
+		SWS_log_warn("[%s:%d] setsockopt error: %s", __FILE__,
+				__LINE__, strerror(errno));	
 	}
 
 	if (bind(listen_fd, (struct sockaddr *)&servaddr,
