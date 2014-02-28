@@ -22,10 +22,16 @@ SWS_web_start()
 	SWS_pids = (pid_t *)malloc(sizeof(pid_t) * SWS_process_num);	
 
 	SWS_lock_init();
-	for (i = 0; i < SWS_process_num; i++) {
+	for (i = 0; i < SWS_process_num; i++) {	
 		SWS_pids[i] = SWS_worker_init(i, listenfd);	
+		if (i == 0) {
+			close(listenfd);
+		}
 	}
 
+	for ( ;; ) {
+		
+	}
 }
 
 void
@@ -102,5 +108,6 @@ SWS_worker_wait_connect(int i, int listenfd)
 		} 
 
 		SWS_web_interation(connfd);
+		close(connfd);
 	}
 }

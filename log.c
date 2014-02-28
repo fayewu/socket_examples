@@ -136,7 +136,7 @@ SWS_log_fatal(const char *format, ...)
 	vsnprintf(log_buf, sizeof(log_buf), format, ap);
 	va_end(ap);
 	SWS_log_to_file(LOG_FATAL, log_buf);
-//	exit(EXIT_FAILURE);
+	exit(EXIT_FAILURE);
 }
 
 
