@@ -9,14 +9,9 @@ static void sig_int(int signo);
 static void sig_child(int signo);
 
 void
-sig_int(int signo){
-	int i;
-
-	for (i = 0; i < SWS_process_num; i++) {
-		kill(SWS_pids[i], SIGTERM);	
-	}
-
-	SWS_log_info("[%s:%d] recive SIGINT", __FILE__, __LINE__);
+sig_int(int signo)
+{
+	exit(EXIT_SUCCESS);	
 }
 
 void
@@ -42,13 +37,13 @@ main(int argc, char *argv[])
 	/* signal register */
 	memset(&sa_int, 0 , sizeof(sa_int));
 	memset(&sa_child, 0, sizeof(sa_child));
-	sa_int.sa_handler = sig_int;
+//	sa_int.sa_handler = sig_int;
 	sa_child.sa_handler = sig_child;
 
-	if (sigaction(SIGINT, &sa_int, NULL) < 0) {
-		SWS_log_fatal("[%s:%d] cannot set SIGINT handler", __FILE__,
-				__LINE__);
-	}
+//	if (sigaction(SIGINT, &sa_int, NULL) < 0) {
+//		SWS_log_fatal("[%s:%d] cannot set SIGINT handler", __FILE__,
+//				__LINE__);
+//	}
 	if (sigaction(SIGCHLD, &sa_child, NULL) < 0) {
 		SWS_log_fatal("[%s:%d] cannot set SIGCHILD handler", __FILE__,
 				__LINE__);
