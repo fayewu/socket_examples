@@ -12,7 +12,13 @@
 
 #include "config.h"
 
-extern pid_t *SWS_pids;
+struct SWS_worker_t {
+	pid_t pid;
+	int count;
+};
+
+//extern pid_t *SWS_pids;
+extern struct SWS_worker_t *SWS_worker; 
 
 extern void SWS_web_start(); 
 

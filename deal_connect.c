@@ -5,7 +5,8 @@
 #include "interaction.h"
 #include "deal_connect.h"
 
-pid_t *SWS_pids; 
+//pid_t *SWS_pids; 
+struct SWS_worker_t *SWS_worker;
 static pthread_mutex_t *mptr;
 
 static void SWS_lock_init();
@@ -19,11 +20,12 @@ SWS_web_start()
 	int listenfd, i;
 
 	listenfd = SWS_listen(SWS_port, SWS_addr);
-	SWS_pids = (pid_t *)malloc(sizeof(pid_t) * SWS_process_num);	
+	SWS_worker = (struct SWS_worker_t *)malloc(sizeof(struct SWS_worker_t) 
+			* SWS_process_num);	
 
 	SWS_lock_init();
 	for (i = 0; i < SWS_process_num; i++) {	
-		SWS_pids[i] = SWS_worker_init(i, listenfd);	
+		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
 		if (i == 0) {
 			close(listenfd);
 		}
@@ -75,6 +77,7 @@ SWS_worker_init(int i, int listenfd)
 		return pid;
 	}
 
+	SWS_worker[i].count = 0;
 	return SWS_worker_wait_connect(i, listenfd);
 }
 
@@ -94,8 +97,6 @@ SWS_worker_wait_connect(int i, int listenfd)
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 
-	// test
-	printf("wait connect\n");
 	for ( ;; ) {
 		SWS_lock_wait();
 		if ((connfd = accept(listenfd, (struct sockaddr *)&cliaddr, 
@@ -106,8 +107,10 @@ SWS_worker_wait_connect(int i, int listenfd)
 			SWS_log_warn("[%s:%d] accept error: %s", __FILE__,
 					__LINE__, strerror(errno));
 		} 
-
+		SWS_worker[i].count++;
 		SWS_web_interation(connfd);
 		close(connfd);
 	}
+
+	return 0;
 }
