@@ -11,4 +11,7 @@ struct SWS_sig_t {
 	SWS_handler_t handler;
 };
 
+extern sig_atomic_t SWS_sig_quit; 
+extern sig_atomic_t SWS_sig_child;
+
 #endif

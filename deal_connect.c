@@ -30,10 +30,6 @@ SWS_web_start()
 			close(listenfd);
 		}
 	}
-
-	for ( ;; ) {
-		
-	}
 }
 
 void
@@ -113,4 +109,14 @@ SWS_worker_wait_connect(int i, int listenfd)
 	}
 
 	return 0;
+}
+
+void
+SWS_worker_exit()
+{
+	int i;
+
+	for (i = 0; i < sizeof(SWS_worker)/sizeof(SWS_worker[0]); i++) {
+		kill(SWS_worker[i].pid, SIGTERM);					
+	}	
 }
