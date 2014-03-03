@@ -132,4 +132,5 @@ SWS_worker_exit()
 	for (i = 0; i < sizeof(SWS_worker)/sizeof(SWS_worker[0]); i++) {
 		kill(SWS_worker[i].pid, SIGTERM);					
 	}	
+
 }
