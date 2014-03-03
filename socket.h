@@ -13,8 +13,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define SWS_OVERTIME		-3
 #define SWS_AGAIN		-2
-#define SWS_
+#define SWS_DELAY_TIME		60	
 
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start();

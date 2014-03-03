@@ -129,15 +129,54 @@ SWS_read_header(int fd, void *vptr, size_t maxlen)
 ssize_t
 SWS_read_content(int fd, void *vptr, size_t maxlen)
 {
-	int n;
+	int n, ret;
+	fd_set set;
+	struct timeval tv;
+
+	FD_ZERO(&set);
+	FD_SET(fd, &set);
+
+	tv.tv_sec = sec;
+	tv.tv_uset = 0;
+
+	for ( ;; ) {
+		ret = select(fd + 1, &set, NULL, NULL, &tv);
+
+		switch (ret) {
+			
+		case -1:
+			if (errno == EINTR) {
+				continue;
+			}
+			break;
+		case 0:
+			errno = ETIMEDOUT;
+			return -1;
+		default: 
+			break;	
+		}
+		break;	
+	}
 
 	n = read(fd, vptr, maxlen);
-	if (n <= 0) {
+	if ( n <= 0) {
 		return n;
 	} else {
-		if (n < maxlen) {
-			return SWS_AGAIN;
-		}
+		if (*(vptr + n) != '\n') {
+			return SWS_AGAIN;	
+		}			
 		return n;
 	}
+
+//	int n;
+//
+//	n = read(fd, vptr, maxlen);
+//	if (n <= 0) {
+//		return n;
+//	} else {
+//		if (n < maxlen) {
+//			return SWS_AGAIN;
+//		}
+//		return n;
+//	}
 }
