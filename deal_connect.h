@@ -22,6 +22,8 @@ extern struct SWS_worker_t *SWS_worker;
 
 extern void SWS_web_start(); 
 
+extern void SWS_wait_worker();
+
 extern void SWS_worker_exit();
 
 #endif

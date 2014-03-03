@@ -112,6 +112,18 @@ SWS_worker_wait_connect(int i, int listenfd)
 }
 
 void
+SWS_wait_worker()
+{
+	pid_t pid;		
+	int status;
+
+	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+		SWS_log_info("[%s:%d] child %d end normally", __FILE__,
+				__LINE__, pid);
+	}
+}
+
+void
 SWS_worker_exit()
 {
 	int i;
