@@ -180,3 +180,9 @@ SWS_read_content(int fd, void *vptr, size_t maxlen)
 //		return n;
 //	}
 }
+
+ssize_t
+SWS_write_content(int fd, void *ptr, size_t maxlen)
+{
+	int n;	
+}
