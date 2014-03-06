@@ -12,33 +12,6 @@ SWS_echo_interation(int connfd)
 	buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
 	buf->addr = (char *)malloc(SWS_BUF_LEN);  
 
-	for ( ;; ) {
-		memset(buf->addr, 0, SWS_BUF_LEN);	
-		buf->loc = 0;
-	
-		n = SWS_read_content(connfd, &buf->addr[buf->loc], SWS_BUF_LEN);
-		if (n == 0) {
-			SWS_log_info("[%s:%d] client terminated prematurely",
-					__FILE__, __LINE__);		
-			return;
-		}
-
-		if (n == -1) {
-			if (errno == EINTR) {
-				continue;	
-			}
-			SWS_log_warn("[%s:%d] read error: %s", __FILE__, 
-					__LINE__, strerror(errno));
-			return;
-		}
-
-		if (n == SWS_AGAIN) {
-			buf->loc += n;
-			continue;	
-		}
-
-		SWS_write_content(connfd, buffer, SWS_BUF_LEN);		
-	}	
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 
@@ -187,7 +160,7 @@ SWS_echo_interation(int connfd)
 //
 //		/* update buffer's used size */
 //		con->buf_loc += n;
-//		if (n == SWS_AGAIN) {
+//		if (n == SWS_UNFINISHED) {
 //			continue;			
 //		}
 //

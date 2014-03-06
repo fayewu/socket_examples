@@ -2,11 +2,14 @@
 #include "socket.h"
 #include "interaction.h"
 
+int SWS_rwtime = 10;
+
 int
 SWS_listen(const int port, const char *address)
 {
 	char *ptr;
-	int reuse = 1;
+	int optlen = 1;
+	int keep_idle = 5, keep_interval, keep_count = 3; 
 	int listen_fd, backlog;
 	struct sockaddr_in servaddr;
 
@@ -23,9 +26,29 @@ SWS_listen(const int port, const char *address)
 		SWS_log_fatal("[%s:%d] socket error: %s", 
 				__FILE__, __LINE__, strerror(errno));	
 	}
-	if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, 
-				sizeof(reuse)) < 0) {
-		SWS_log_warn("[%s:%d] setsockopt error: %s", __FILE__,
+	if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optlen, 
+				sizeof(optlen)) < 0) {
+		SWS_log_warn("[%s:%d] set reuse addr error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+	if (setsockopt(listen_fd, SOL_SOCKET, SO_KEEPALIVE, &optlen,
+				sizeof(optlen)) < 0) {
+		SWS_log_warn("[%s:%d] set keepalive error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+	if (setsockopt(listen_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keep_idle,
+				sizeof(keep_idle)) < 0) {
+		SWS_log_warn("[%s:%d] set tcp keepidle error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+	if (setsockopt(listen_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keep_interval,
+				sizeof(keep_interval)) < 0) {
+		SWS_log_warn("[%s:%d] set tcp keepidle error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+	if (setsockopt(listen_fd, IPPROTO_TCP, TCP_KEEPCNT, &keep_count,
+				sizeof(keep_count)) < 0) {
+		SWS_log_warn("[%s:%d] set tcp keepcnt error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
 
@@ -107,82 +130,68 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 	return n;
 }
 
-ssize_t
-SWS_read_header(int fd, void *vptr, size_t maxlen)
-{
-	int n, len;
-	char *ptr = vptr;
-	
-	n = read(fd, ptr, maxlen);
-
-	if (n <= 0) {
-		return n;
-	} else {
-		len = strlen(ptr) - 4;	
-		if (strcmp(&ptr[len], "\r\n\r\n")) {
-			return SWS_AGAIN;
-		}
-		return n;
-	}
-}
-
-ssize_t
-SWS_read_content(int fd, void *vptr, size_t maxlen)
-{
-	int n, ret;
-	fd_set set;
-	struct timeval tv;
-
-	FD_ZERO(&set);
-	FD_SET(fd, &set);
-
-	tv.tv_sec = sec;
-	tv.tv_uset = 0;
-
-	for ( ;; ) {
-		ret = select(fd + 1, &set, NULL, NULL, &tv);
-
-		switch (ret) {
-			
-		case -1:
-			if (errno == EINTR) {
-				continue;
-			}
-			break;
-		case 0:
-			errno = ETIMEDOUT;
-			return -1;
-		default: 
-			break;	
-		}
-		break;	
-	}
-
-	n = read(fd, vptr, maxlen);
-	if ( n <= 0) {
-		return n;
-	} else {
-		if (*(vptr + n) != '\n') {
-			return SWS_AGAIN;	
-		}			
-		return n;
-	}
-
-//	int n;
+//ssize_t
+//SWS_read_header(int fd, void *vptr, size_t maxlen)
+//{
+//	int n, len;
+//	char *ptr = vptr;
+//	
+//	if (SWS_timeout()) {
+//		
+//	}
+//	n = read(fd, ptr, maxlen);
 //
-//	n = read(fd, vptr, maxlen);
 //	if (n <= 0) {
 //		return n;
 //	} else {
-//		if (n < maxlen) {
-//			return SWS_AGAIN;
+//		len = strlen(ptr) - 4;	
+//		if (strcmp(&ptr[len], "\r\n\r\n")) {
+//			return SWS_UNFINISHED;
 //		}
 //		return n;
 //	}
-}
+//}
 
-ssize_t
-SWS_write_content(int fd, void *ptr, size_t maxlen)
-{
-	int n;	
-}
+//void
+//SWS_timeout(int fd)
+//{
+//	int ret;
+//	fd_set set;
+//	struct timeval tv;
+//
+//	FD_ZERO(&set);
+//	FD_SET(fd, &set);
+//
+//	tv.tv_sec = SWS_rwtime;
+//	tv.tv_uset = 0;
+//
+//	return select(fd + 1, &set, NULL, NULL, &tv);
+//}
+//
+//
+//ssize_t
+//SWS_read_content(int fd, void *vptr, size_t maxlen)
+//{
+//	int n;
+//
+//	if (SWS_timeout(fd) < 0) {
+//		return SWS_ERROR;
+//	}
+//	n = read(fd, vptr, maxlen);
+//	if ( n <= 0) {
+//		return n;
+//	} else {
+//		if (*(vptr + n) != '\n') {
+//			return SWS_UNFINISHED;	
+//		}			
+//		return n;
+//	}
+//}
+//
+//ssize_t
+//SWS_write_content(int fd, void *ptr, size_t maxlen)
+//{
+//	int n;	
+//}
+//
+//

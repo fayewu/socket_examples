@@ -9,12 +9,13 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
 
 #define SWS_OVERTIME		-3
-#define SWS_AGAIN		-2
+#define SWS_UNFINISHED		-2
 #define SWS_DELAY_TIME		60	
 
 extern int SWS_listen(const int port, const char *address);

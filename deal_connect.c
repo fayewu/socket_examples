@@ -104,7 +104,7 @@ SWS_worker_wait_connect(int i, int listenfd)
 					__LINE__, strerror(errno));
 		} 
 		SWS_worker[i].count++;
-		SWS_echo_interation();
+		SWS_echo_interation(connfd);
 //		SWS_web_interation(connfd);
 		close(connfd);
 	}
