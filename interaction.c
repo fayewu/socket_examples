@@ -12,6 +12,9 @@ SWS_echo_interation(int connfd)
 	buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
 	buf->addr = (char *)malloc(SWS_BUF_LEN);  
 
+	for ( ;; ) {
+		
+	}
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 

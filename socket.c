@@ -9,7 +9,7 @@ SWS_listen(const int port, const char *address)
 {
 	char *ptr;
 	int optlen = 1;
-	int keep_idle = 5, keep_interval, keep_count = 3; 
+	int keep_idle = 5, keep_interval = 1, keep_count = 3; 
 	int listen_fd, backlog;
 	struct sockaddr_in servaddr;
 
