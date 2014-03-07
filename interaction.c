@@ -6,14 +6,33 @@
 void
 SWS_echo_interation(int connfd)
 {	
-	int n;
+	int ret;
+	fd_set set;
+	struct timeval tv;
 	struct SWS_buf_t *buf;
 
+	FD_ZERO(&set);
+	FD_SET(connfd, &set);
 	buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
 	buf->addr = (char *)malloc(SWS_BUF_LEN);  
 
 	for ( ;; ) {
+		tv.tv_sec = 10;
+		tv.tv_usec = 0;
+		ret = select(connfd + 1, &set, NULL, NULL, &tv);
+	
+		switch (ret) {
 		
+		case 0:
+			printf("timeout\n");	
+			return;
+		case -1:
+			return;	
+		default:
+			SWS_read_content(connfd, buf->addr, 1000);
+			printf("%s\n", buf->addr);
+			break;
+		}
 	}
 }
 

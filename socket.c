@@ -168,16 +168,15 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 //	return select(fd + 1, &set, NULL, NULL, &tv);
 //}
 //
-//
-//ssize_t
-//SWS_read_content(int fd, void *vptr, size_t maxlen)
-//{
-//	int n;
-//
-//	if (SWS_timeout(fd) < 0) {
-//		return SWS_ERROR;
-//	}
-//	n = read(fd, vptr, maxlen);
+
+ssize_t
+SWS_read_content(int fd, void *vptr, size_t maxlen)
+{
+	int n;
+
+	n = read(fd, vptr, maxlen);
+
+	return n;
 //	if ( n <= 0) {
 //		return n;
 //	} else {
@@ -186,8 +185,8 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 //		}			
 //		return n;
 //	}
-//}
-//
+}
+
 //ssize_t
 //SWS_write_content(int fd, void *ptr, size_t maxlen)
 //{
