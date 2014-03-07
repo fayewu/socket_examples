@@ -170,27 +170,28 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 //
 
 ssize_t
-SWS_read_content(int fd, void *vptr, size_t maxlen)
+SWS_read(int fd, void *vptr, size_t maxlen)
 {
 	int n;
 
 	n = read(fd, vptr, maxlen);
 
-	return n;
-//	if ( n <= 0) {
-//		return n;
-//	} else {
-//		if (*(vptr + n) != '\n') {
-//			return SWS_UNFINISHED;	
-//		}			
-//		return n;
-//	}
+	if ( n <= 0) {
+		return n;
+	} else {
+		if (*(vptr + n) != '\n') {
+			return SWS_UNFINISHED;	
+		}			
+		return n;
+	}
 }
 
-//ssize_t
-//SWS_write_content(int fd, void *ptr, size_t maxlen)
-//{
-//	int n;	
-//}
-//
-//
+ssize_t
+SWS_write(int fd, void *vptr, size_t maxlen)
+{
+	int n;	
+
+	n = write(fd, vptr, maxlen);	
+
+	return n;
+}

@@ -17,8 +17,9 @@ SWS_echo_interation(int connfd)
 	buf->addr = (char *)malloc(SWS_BUF_LEN);  
 
 	for ( ;; ) {
-		tv.tv_sec = 10;
+		tv.tv_sec = 120;
 		tv.tv_usec = 0;
+		memset(buf->addr, 0, sizeof(buf->addr));
 		ret = select(connfd + 1, &set, NULL, NULL, &tv);
 	
 		switch (ret) {
@@ -27,13 +28,28 @@ SWS_echo_interation(int connfd)
 			printf("timeout\n");	
 			return;
 		case -1:
+			SWS_log_error("[%s:%d] select error: %s\n", __FILE__,
+					__LINE__, strerror(errno));
 			return;	
 		default:
-			SWS_read_content(connfd, buf->addr, 1000);
-			printf("%s\n", buf->addr);
 			break;
 		}
+
+		ret = SWS_read(connfd, buf->addr, 1000);
+		if (ret == 0) {
+			SWS_log_info("[%s:%d] client terminated prematurely",
+					__FILE__, __LINE__);		
+			return;
+		} else if (ret == -1) {
+			SWS_log_error("[%s:%d] read error", __FILE__, __LINE__);			
+		} else if (ret == SWS_UNFINISHED)
+					
+		} else {
+			SWS_write
+		}
+		
 	}
+	
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 
