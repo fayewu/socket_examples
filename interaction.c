@@ -3,53 +3,86 @@
 #include "socket.h"
 #include "interaction.h"
 
+static int SWS_connfd;
+static struct SWS_buf_t *SWS_buf;
+static struct SWS_buf_t *SWS_wbuf;
+
+static void *SWS_write_thread(void *arg);
+
 void
 SWS_echo_interation(int connfd)
 {	
-	int ret;
-	fd_set set;
-	struct timeval tv;
-	struct SWS_buf_t *buf;
+	int n;
+	pthread_t tid;
 
-	FD_ZERO(&set);
-	FD_SET(connfd, &set);
-	buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
-	buf->addr = (char *)malloc(SWS_BUF_LEN);  
+	SWS_buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
+	SWS_buf->addr = (char *)malloc(SWS_BUF_LEN + 1);  
+	SWS_wbuf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
+	SWS_wbuf->addr = (char *)malloc(SWS_BUF_LEN + 1);  
+
+	SWS_buf->loc = 0;
+	SWS_wbuf->loc = 0;
+	memset(SWS_buf->addr, 0, SWS_BUF_LEN + 1);
+	memset(SWS_wbuf->addr, 0, SWS_BUF_LEN + 1);
+
+	if (pthread_create(&tid, NULL, SWS_write_thread, NULL) < 0) {
+		SWS_log_error("[%s:%d] thread create error", __FILE__, __LINE__);	
+	}
 
 	for ( ;; ) {
-		tv.tv_sec = 120;
-		tv.tv_usec = 0;
-		memset(buf->addr, 0, sizeof(buf->addr));
-		ret = select(connfd + 1, &set, NULL, NULL, &tv);
-	
-		switch (ret) {
-		
-		case 0:
-			printf("timeout\n");	
-			return;
-		case -1:
-			SWS_log_error("[%s:%d] select error: %s\n", __FILE__,
-					__LINE__, strerror(errno));
-			return;	
-		default:
-			break;
-		}
+		n = SWS_read(connfd, &SWS_buf->addr[SWS_buf->loc], SWS_BUF_LEN);			
 
-		ret = SWS_read(connfd, buf->addr, 1000);
-		if (ret == 0) {
+		if (n == 0) {
 			SWS_log_info("[%s:%d] client terminated prematurely",
 					__FILE__, __LINE__);		
 			return;
-		} else if (ret == -1) {
-			SWS_log_error("[%s:%d] read error", __FILE__, __LINE__);			
-		} else if (ret == SWS_UNFINISHED)
-					
-		} else {
-			SWS_write
 		}
-		
+		if (n == SWS_UNFINISHED) {
+			SWS_buf->loc += n;		
+			continue;
+		} 
+		if ( n < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+			SWS_log_error("[%s:%d] read error: %s", __FILE__, 
+					__LINE__, strerror(errno));		
+			return;
+		} 
+
+		SWS_connfd = connfd;
+
+		if (SWS_BUF_LEN + 1 - SWS_buf->loc > 0) {
+			strcpy(&SWS_wbuf->addr[SWS_wbuf->loc], SWS_buf->addr);			
+		}
+		printf("server: %s\n", SWS_buf->addr);
 	}
-	
+}
+
+void *
+SWS_write_thread(void *arg)
+{
+	int n;
+
+	for ( ;; ) {
+		while (SWS_wbuf->addr[0] != '\0') {
+			n = SWS_write(SWS_connfd, SWS_wbuf, SWS_wbuf->loc);
+			if (n < 0) {
+				if (errno == EINTR) {
+					continue;
+				}	
+				
+				if (errno == EPIPE) {
+					SWS_log_info("[%s:%d] client shutdown",
+							__FILE__, __LINE__);	
+					return NULL;
+				}
+				return NULL;
+			}
+		}
+	}
+
+	return NULL;
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <pthread.h>
 
 #define SWS_BUF_LEN				1024
 
@@ -12,6 +13,7 @@ struct SWS_buf_t {
 	char *addr;
 	int loc;
 };
+
 
 extern void SWS_echo_interation();
 

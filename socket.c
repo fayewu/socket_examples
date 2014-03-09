@@ -173,13 +173,14 @@ ssize_t
 SWS_read(int fd, void *vptr, size_t maxlen)
 {
 	int n;
+	char *sptr = vptr;
 
 	n = read(fd, vptr, maxlen);
 
 	if ( n <= 0) {
 		return n;
 	} else {
-		if (*(vptr + n) != '\n') {
+		if (*(sptr + n - 1) != '\n') {
 			return SWS_UNFINISHED;	
 		}			
 		return n;
@@ -189,9 +190,5 @@ SWS_read(int fd, void *vptr, size_t maxlen)
 ssize_t
 SWS_write(int fd, void *vptr, size_t maxlen)
 {
-	int n;	
-
-	n = write(fd, vptr, maxlen);	
-
-	return n;
+	return write(fd, vptr, maxlen);	
 }
