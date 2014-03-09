@@ -30,17 +30,13 @@ SWS_echo_interation(int connfd)
 	}
 
 	for ( ;; ) {
-		n = SWS_read(connfd, &SWS_buf->addr[SWS_buf->loc], SWS_BUF_LEN);			
+		n = SWS_read(connfd, SWS_buf->addr, SWS_BUF_LEN);			
 
 		if (n == 0) {
 			SWS_log_info("[%s:%d] client terminated prematurely",
 					__FILE__, __LINE__);		
 			return;
 		}
-		if (n == SWS_UNFINISHED) {
-			SWS_buf->loc += n;		
-			continue;
-		} 
 		if ( n < 0) {
 			if (errno == EINTR) {
 				continue;

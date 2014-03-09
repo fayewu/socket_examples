@@ -23,13 +23,15 @@ LOG_WARN	log.h	14;"	d
 Malloc	memory_poll.c	/^Malloc(size_t size)$/;"	f
 OBJ	Makefile	/^OBJ = SWS.o log.o utils.o socket.o config.o interaction.o deal_connect.o$/;"	m
 SRC	Makefile	/^SRC = src\/$/;"	m
-SWS_AGAIN	socket.h	17;"	d
-SWS_BUF_LEN	interaction.h	9;"	d
-SWS_DELAY_TIME	socket.h	18;"	d
+SWS_BUF_LEN	interaction.h	10;"	d
+SWS_DELAY_TIME	socket.h	19;"	d
 SWS_LOG_PATH	log.h	18;"	d
-SWS_OVERTIME	socket.h	16;"	d
+SWS_OVERTIME	socket.h	17;"	d
+SWS_UNFINISHED	socket.h	18;"	d
 SWS_addr	config.c	/^const char *SWS_addr;$/;"	v
+SWS_buf	interaction.c	/^static struct SWS_buf_t *SWS_buf;$/;"	v	typeref:struct:SWS_buf_t	file:
 SWS_buf_t	interaction.h	/^struct SWS_buf_t {$/;"	s
+SWS_connfd	interaction.c	/^static int SWS_connfd;$/;"	v	file:
 SWS_echo_interation	interaction.c	/^SWS_echo_interation(int connfd)$/;"	f
 SWS_error_log	config.c	/^const char *SWS_error_log;$/;"	v
 SWS_get_config	config.c	/^SWS_get_config()$/;"	f
@@ -49,11 +51,11 @@ SWS_log_to_file	log.c	/^SWS_log_to_file(int level, const char *log)$/;"	f	file:
 SWS_log_warn	log.c	/^SWS_log_warn(const char *format, ...)$/;"	f
 SWS_port	config.c	/^int SWS_port;$/;"	v
 SWS_process_num	config.c	/^int SWS_process_num;$/;"	v
-SWS_read_content	socket.c	/^SWS_read_content(int fd, void *vptr, size_t maxlen)$/;"	f
-SWS_read_header	socket.c	/^SWS_read_header(int fd, void *vptr, size_t maxlen)$/;"	f
+SWS_read	socket.c	/^SWS_read(int fd, void *vptr, size_t maxlen)$/;"	f
 SWS_read_request_line	socket.c	/^SWS_read_request_line(int fd, void *vptr, size_t maxlen)$/;"	f
 SWS_request_body	config.c	/^int SWS_request_body;$/;"	v
 SWS_request_header	config.c	/^int SWS_request_header; $/;"	v
+SWS_rwtime	socket.c	/^int SWS_rwtime = 10;$/;"	v
 SWS_sig_child	SWS.c	/^sig_atomic_t SWS_sig_child;$/;"	v
 SWS_sig_handler	SWS.c	/^SWS_sig_handler(int signo)$/;"	f
 SWS_sig_quit	SWS.c	/^sig_atomic_t SWS_sig_quit; $/;"	v
@@ -66,6 +68,7 @@ SWS_str_cmp6	utils.h	35;"	d
 SWS_str_cmp7	utils.h	38;"	d
 SWS_str_cmp8	utils.h	41;"	d
 SWS_wait_worker	deal_connect.c	/^SWS_wait_worker()$/;"	f
+SWS_wbuf	interaction.c	/^static struct SWS_buf_t *SWS_wbuf;$/;"	v	typeref:struct:SWS_buf_t	file:
 SWS_web_root	config.c	/^const char *SWS_web_root;$/;"	v
 SWS_web_start	deal_connect.c	/^SWS_web_start()$/;"	f
 SWS_worker	deal_connect.c	/^struct SWS_worker_t *SWS_worker;$/;"	v	typeref:struct:SWS_worker_t
@@ -73,7 +76,8 @@ SWS_worker_exit	deal_connect.c	/^SWS_worker_exit()$/;"	f
 SWS_worker_init	deal_connect.c	/^SWS_worker_init(int i, int listenfd)$/;"	f
 SWS_worker_t	deal_connect.h	/^struct SWS_worker_t {$/;"	s
 SWS_worker_wait_connect	deal_connect.c	/^SWS_worker_wait_connect(int i, int listenfd)$/;"	f
-SWS_write_content	socket.c	/^SWS_write_content(int fd, void *ptr, size_t maxlen)$/;"	f
+SWS_write	socket.c	/^SWS_write(int fd, void *vptr, size_t maxlen)$/;"	f
+SWS_write_thread	interaction.c	/^SWS_write_thread(void *arg)$/;"	f
 TARGET	Makefile	/^TARGET = SWS$/;"	m
 True	utils.h	21;"	d
 _CONFIG_H	config.h	2;"	d
@@ -94,12 +98,7 @@ count	deal_connect.h	/^	int count;$/;"	m	struct:SWS_worker_t
 err_exit	utils.c	/^err_exit(const char *str)$/;"	f
 err_exit1	utils.c	/^err_exit1(const char *format, ...)$/;"	f
 err_info	utils.c	/^err_info(const char *str)$/;"	f
-f	test.c	/^	func_t f;$/;"	m	struct:foo	file:
-foo	test.c	/^struct foo {$/;"	s	file:
 free	memory_poll.h	/^	struct memory_unit *free;$/;"	m	struct:memory_poll_block	typeref:struct:memory_poll_block::memory_unit
-func1	test.c	/^func1()$/;"	f
-func2	test.c	/^func2()$/;"	f
-func_t	test.c	/^typedef void (*func_t)(void); $/;"	t	file:
 handler	SWS.h	/^	SWS_handler_t handler;$/;"	m	struct:SWS_sig_t
 loc	interaction.h	/^	int loc;$/;"	m	struct:SWS_buf_t
 main	SWS.c	/^main(int argc, char *argv[])$/;"	f
@@ -111,13 +110,11 @@ memory_poll_free	memory_poll.c	/^memory_poll_free()$/;"	f
 memory_poll_init	memory_poll.c	/^memory_poll_init()$/;"	f
 memory_unit	memory_poll.h	/^struct memory_unit {$/;"	s
 mptr	deal_connect.c	/^static pthread_mutex_t *mptr;$/;"	v	file:
-name	test.c	/^	char *name;	$/;"	m	struct:foo	file:
 next	memory_poll.h	/^	struct memory_poll_block *next;$/;"	m	struct:memory_poll_block	typeref:struct:memory_poll_block::memory_poll_block
 pid	deal_connect.h	/^	pid_t pid;$/;"	m	struct:SWS_worker_t
 signo	SWS.h	/^	int signo;	$/;"	m	struct:SWS_sig_t
 size	memory_poll.h	/^	size_t size;$/;"	m	struct:memory_unit
 sock	test/get_status.py	/^sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)$/;"	v
-test	test.c	/^struct foo test[] =  {$/;"	v	typeref:struct:foo
 user_exit	utils.c	/^user_exit(const char *str)$/;"	f
 user_exit1	utils.c	/^user_exit1(const char *format, ...)$/;"	f
 user_info	utils.c	/^user_info(const char *str)$/;"	f

@@ -173,15 +173,18 @@ ssize_t
 SWS_read(int fd, void *vptr, size_t maxlen)
 {
 	int n;
-	char *sptr = vptr;
+	char *sptr;
 
+again:	
 	n = read(fd, vptr, maxlen);
 
 	if ( n <= 0) {
 		return n;
 	} else {
+		sptr = vptr;
 		if (*(sptr + n - 1) != '\n') {
-			return SWS_UNFINISHED;	
+			vptr += n;
+			goto again;
 		}			
 		return n;
 	}
