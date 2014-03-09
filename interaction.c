@@ -53,8 +53,10 @@ SWS_echo_interation(int connfd)
 		SWS_connfd = connfd;
 
 		if (SWS_BUF_LEN + 1 - SWS_buf->loc > 0) {
-			strcpy(&SWS_wbuf->addr[SWS_wbuf->loc], SWS_buf->addr);			
+			strcat(&SWS_wbuf->addr[SWS_wbuf->loc], SWS_buf->addr);			
 		}
+		SWS_wbuf->loc += SWS_buf->loc;
+		SWS_buf->loc = 0;
 		printf("server: %s\n", SWS_buf->addr);
 	}
 }
