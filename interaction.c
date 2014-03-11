@@ -7,6 +7,9 @@ static int SWS_connfd;
 static struct SWS_buf_t *SWS_buf;
 static struct SWS_buf_t *SWS_wbuf;
 
+static int SWS_wthread_ctrl = 1;
+static int SWS_rthread_ctrl = 1;
+
 static void *SWS_write_thread(void *arg);
 
 void
@@ -29,14 +32,21 @@ SWS_echo_interation(int connfd)
 		SWS_log_error("[%s:%d] thread create error", __FILE__, __LINE__);	
 	}
 
-	for ( ;; ) {
+	while (SWS_rthread_ctrl) {
 		n = SWS_read(connfd, SWS_buf->addr, SWS_BUF_LEN);			
 
 		if (n == 0) {
 			SWS_log_info("[%s:%d] client terminated prematurely",
 					__FILE__, __LINE__);		
+			goto over;
+		}
+
+		if (n == SWS_TIMEOUT) {
+			SWS_log_info("[%s:%d] read/write time out, closing...",
+					__FILE__, __LINE__);	
 			return;
 		}
+
 		if ( n < 0) {
 			if (errno == EINTR) {
 				continue;
@@ -62,24 +72,24 @@ SWS_write_thread(void *arg)
 {
 	int n;
 
-	for ( ;; ) {
+	while (SWS_wthread_ctrl) {
 		while (SWS_wbuf->addr[0] != '\0') {
 			n = SWS_write(SWS_connfd, SWS_wbuf, SWS_wbuf->loc);
+			if (n == SWS_TIMEOUT) {
+				goto end;			
+			}
+
 			if (n < 0) {
 				if (errno == EINTR) {
 					continue;
 				}	
-				
-				if (errno == EPIPE) {
-					SWS_log_info("[%s:%d] client shutdown",
-							__FILE__, __LINE__);	
-					return NULL;
-				}
-				return NULL;
+				goto end;
 			}
 		}
 	}
 
+end:
+	SWS_rthread_ctrl = 0;	
 	return NULL;
 }
 

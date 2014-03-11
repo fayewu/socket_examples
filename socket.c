@@ -2,7 +2,8 @@
 #include "socket.h"
 #include "interaction.h"
 
-int SWS_rwtime = 10;
+static int SWS_rwtime = 10;
+static int SWS_timeout(int fd, int sec, int rwflag);
 
 int
 SWS_listen(const int port, const char *address)
@@ -169,11 +170,42 @@ SWS_read_request_line(int fd, void *vptr, size_t maxlen)
 //}
 //
 
+int
+SWS_timeout(int fd, int sec, int rwflag)
+{
+	fd_set rset;	
+	struct timeval tv;
+
+	FD_ZERO(&rset);
+	FD_SET(fd, &rset);
+
+	tv.tv_sec = sec;
+	tv.tv_uset = 0;
+
+	return select(fd + 1, &rset, NULL, NULL, &tv);
+}
+
 ssize_t
 SWS_read(int fd, void *vptr, size_t maxlen)
 {
-	int n;
+	int n, ret;
 	char *sptr;
+
+	while (True) {
+		ret = SWS_timeout(fd, SWS_rwtime, SWS_READ_TIMEO);	
+
+		if (ret < 0) {
+			if (errno == EINTR) {
+				continue;	
+			}
+		}
+
+		if (ret == 0) {
+			return SWS_TIMEOUT;	
+		}
+
+		break;
+	}
 
 again:	
 	n = read(fd, vptr, maxlen);
