@@ -38,13 +38,13 @@ SWS_echo_interation(int connfd)
 		if (n == 0) {
 			SWS_log_info("[%s:%d] client terminated prematurely",
 					__FILE__, __LINE__);		
-			goto over;
+			goto end;
 		}
 
 		if (n == SWS_TIMEOUT) {
 			SWS_log_info("[%s:%d] read/write time out, closing...",
 					__FILE__, __LINE__);	
-			return;
+			goto end;
 		}
 
 		if ( n < 0) {
@@ -53,7 +53,7 @@ SWS_echo_interation(int connfd)
 			}
 			SWS_log_error("[%s:%d] read error: %s", __FILE__, 
 					__LINE__, strerror(errno));		
-			return;
+			goto end;
 		} 
 
 		SWS_connfd = connfd;
@@ -65,6 +65,10 @@ SWS_echo_interation(int connfd)
 		SWS_buf->loc = 0;
 		printf("server: %s\n", SWS_buf->addr);
 	}
+
+end:
+	SWS_wthread_ctrl = 0;
+	return;
 }
 
 void *

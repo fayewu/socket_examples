@@ -1,4 +1,5 @@
 #include "log.h"
+#include "utils.h"
 #include "socket.h"
 #include "interaction.h"
 
@@ -180,7 +181,7 @@ SWS_timeout(int fd, int sec, int rwflag)
 	FD_SET(fd, &rset);
 
 	tv.tv_sec = sec;
-	tv.tv_uset = 0;
+	tv.tv_usec = 0;
 
 	return select(fd + 1, &rset, NULL, NULL, &tv);
 }

@@ -81,9 +81,16 @@ void
 SWS_lock_wait()
 {
 	if (pthread_mutex_lock(mptr) != 0) {
-		SWS_log_fatal("[%s:%d] mutex lock error: %s", __FILE__,
-				__LINE__, strerror(errno));		
+		SWS_log_error("[%s:%d] mutex lock error", __FILE__, __LINE__);	
 	}	
+}
+
+void
+SWS_lock_release()
+{
+	if (pthread_mutex_unlock(mptr) != 0) {
+		SWS_log_error("[%s:%d] mutex unlock error", __FILE__, __LINE__);	
+	}
 }
 
 int
@@ -103,6 +110,7 @@ SWS_worker_wait_connect(int i, int listenfd)
 			SWS_log_warn("[%s:%d] accept error: %s", __FILE__,
 					__LINE__, strerror(errno));
 		} 
+		SWS_lock_release();
 		SWS_worker[i].count++;
 		SWS_echo_interation(connfd);
 //		SWS_web_interation(connfd);

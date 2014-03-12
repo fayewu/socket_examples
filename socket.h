@@ -14,12 +14,9 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 
-#define SWS_OVERTIME		-3
-#define SWS_UNFINISHED		-2
-#define SWS_DELAY_TIME		60	
-
 #define SWS_READ_TIMEO		0
 #define SWS_WRITE_TIMEO		1
+#define SWS_TIMEOUT		-2
 
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start();
