@@ -68,7 +68,7 @@ SWS_listen(const int port, const char *address)
 				strerror(errno));
 	}
 
-	return listen_fd;	
+	return listen_fd;
 }
 
 //void

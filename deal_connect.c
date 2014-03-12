@@ -17,18 +17,18 @@ static int SWS_worker_wait_connect(int i, int listenfd);
 void
 SWS_web_start()
 {
-	int listenfd, i;
+	int i, listenfd;
 
-	listenfd = SWS_listen(SWS_port, SWS_addr);
 	SWS_worker = (struct SWS_worker_t *)malloc(sizeof(struct SWS_worker_t) 
 			* SWS_process_num);	
+	listenfd = SWS_listen(SWS_port, SWS_addr);
 
 	SWS_lock_init();
 	for (i = 0; i < SWS_process_num; i++) {	
 		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
-		if (i == 0) {
-			close(listenfd);
-		}
+//		if (i == 0) {
+//			close(listenfd);
+//		}
 	}
 }
 
@@ -102,6 +102,7 @@ SWS_worker_wait_connect(int i, int listenfd)
 
 	for ( ;; ) {
 		SWS_lock_wait();
+		printf("%d\n", listenfd);
 		if ((connfd = accept(listenfd, (struct sockaddr *)&cliaddr, 
 						&clilen)) < 0) {
 			if (errno == EINTR) {
