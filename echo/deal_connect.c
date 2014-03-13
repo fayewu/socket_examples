@@ -98,7 +98,6 @@ SWS_worker_wait_connect(int i, int listenfd)
 
 	for ( ;; ) {
 		SWS_lock_wait();
-		printf("%d\n", listenfd);
 		if ((connfd = accept(listenfd, (struct sockaddr *)&cliaddr, 
 						&clilen)) < 0) {
 			if (errno == EINTR) {
@@ -109,7 +108,6 @@ SWS_worker_wait_connect(int i, int listenfd)
 		} 
 		SWS_lock_release();
 		SWS_worker[i].count++;
-		printf("%d %d: %d\n", i, SWS_worker[i].pid, SWS_worker[i].count);
 		SWS_echo_interation(connfd);
 //		SWS_web_interation(connfd);
 		close(connfd);

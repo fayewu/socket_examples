@@ -25,7 +25,7 @@ tcp_connect()
 	memset(&cliaddr, 0, sizeof(cliaddr));
 
 	cliaddr.sin_family = AF_INET;
-	cliaddr.sin_port = htons(9876);
+	cliaddr.sin_port = htons(5000);
 	cliaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
 
 	if ((connect_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
