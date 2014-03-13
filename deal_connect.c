@@ -5,9 +5,8 @@
 #include "interaction.h"
 #include "deal_connect.h"
 
-//pid_t *SWS_pids; 
-struct SWS_worker_t *SWS_worker;
 static pthread_mutex_t *mptr;
+struct SWS_worker_t *SWS_worker;
 
 static void SWS_lock_init();
 static pid_t SWS_worker_init(int i, int listenfd);
@@ -19,16 +18,13 @@ SWS_web_start()
 {
 	int i, listenfd;
 
-	SWS_worker = (struct SWS_worker_t *)malloc(sizeof(struct SWS_worker_t) 
-			* SWS_process_num);	
 	listenfd = SWS_listen(SWS_port, SWS_addr);
-
+	SWS_worker = mmap(0, SWS_process_num * sizeof(struct SWS_worker_t),
+			PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);	
 	SWS_lock_init();
+
 	for (i = 0; i < SWS_process_num; i++) {	
 		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
-//		if (i == 0) {
-//			close(listenfd);
-//		}
 	}
 }
 
@@ -113,6 +109,7 @@ SWS_worker_wait_connect(int i, int listenfd)
 		} 
 		SWS_lock_release();
 		SWS_worker[i].count++;
+		printf("%d %d: %d\n", i, SWS_worker[i].pid, SWS_worker[i].count);
 		SWS_echo_interation(connfd);
 //		SWS_web_interation(connfd);
 		close(connfd);
@@ -139,6 +136,8 @@ SWS_worker_exit()
 	int i;
 
 	for (i = 0; i < SWS_process_num; i++) {
+		printf("pid: %d count: %d\n", SWS_worker[i].pid, 
+				SWS_worker[i].count);
 		kill(SWS_worker[i].pid, SIGTERM);					
 	}	
 }

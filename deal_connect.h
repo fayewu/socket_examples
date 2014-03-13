@@ -17,7 +17,6 @@ struct SWS_worker_t {
 	int count;
 };
 
-//extern pid_t *SWS_pids;
 extern struct SWS_worker_t *SWS_worker; 
 
 extern void SWS_web_start(); 
