@@ -70,7 +70,7 @@ SWS_echo_interation(int connfd)
 	}
 
 end:
-	SWS_rthread_ctrl = 0;
+	SWS_wthread_ctrl = 0;
 	return;
 }
 
