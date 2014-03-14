@@ -11,7 +11,9 @@ struct SWS_worker_t *SWS_worker;
 static void SWS_lock_init();
 static pid_t SWS_worker_init(int i, int listenfd);
 static void SWS_lock_wait();
+static void SWS_lock_release();
 static int SWS_worker_wait_connect(int i, int listenfd);
+static void SWS_cpu_time();
 
 void
 SWS_web_start()
@@ -129,6 +131,31 @@ SWS_wait_worker()
 }
 
 void
+SWS_cpu_time()
+{
+	double user, sys;	
+	struct rusage myusage, childusage;
+
+	if (getrusage(RUSAGE_SELF, &myusage) < 0) {
+		SWS_log_error("[%s:%d] getrusage error", __FILE__, __LINE__);	
+	}
+	if (getrusage(RUSAGE_CHILDREN, &childusage) < 0) {
+		SWS_log_error("[%s:%d] getrusage error", __FILE__, __LINE__);	
+	}
+
+	user = (double)myusage.ru_utime.tv_sec + 
+		myusage.ru_utime.tv_usec / 1000000.0;
+	user += (double)childusage.ru_utime.tv_sec + 
+		childusage.ru_utime.tv_usec / 1000000.0;
+	sys = (double)myusage.ru_stime.tv_sec + 
+		myusage.ru_stime.tv_usec / 1000000.0;
+	sys += (double)childusage.ru_stime.tv_sec + 
+		childusage.ru_stime.tv_usec / 1000000.0;
+
+	printf("\nuser time = %g, sys time = %g\n", user, sys);
+}
+
+void
 SWS_worker_exit()
 {
 	int i;
@@ -138,4 +165,5 @@ SWS_worker_exit()
 				SWS_worker[i].count);
 		kill(SWS_worker[i].pid, SIGTERM);					
 	}	
+	SWS_cpu_time();
 }

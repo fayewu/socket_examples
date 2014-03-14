@@ -14,7 +14,7 @@
 #define SWS_CLIENT_NUM		4
 #define SWS_CONNECT_NUM		50
 
-char line[1024] = {"hello"};
+char line[1024] = {"hello\n"};
 
 int
 tcp_connect()

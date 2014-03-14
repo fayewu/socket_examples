@@ -28,21 +28,24 @@ SWS_echo_interation(int connfd)
 	memset(SWS_buf->addr, 0, SWS_BUF_LEN + 1);
 	memset(SWS_wbuf->addr, 0, SWS_BUF_LEN + 1);
 
+	SWS_rthread_ctrl = 1;
+	SWS_wthread_ctrl = 1;
+
 	if (pthread_create(&tid, NULL, SWS_write_thread, NULL) < 0) {
 		SWS_log_error("[%s:%d] thread create error", __FILE__, __LINE__);	
 	}
-
+	
 	while (SWS_rthread_ctrl) {
 		n = SWS_read(connfd, SWS_buf->addr, SWS_BUF_LEN);			
 
 		if (n == 0) {
-			SWS_log_info("[%s:%d] client terminated prematurely",
+			SWS_log_info("[%s:%d] client terminated prematurely\n",
 					__FILE__, __LINE__);		
 			goto end;
 		}
 
 		if (n == SWS_TIMEOUT) {
-			SWS_log_info("[%s:%d] read/write time out, closing...",
+			SWS_log_info("[%s:%d] read/write time out, closing...\n",
 					__FILE__, __LINE__);	
 			goto end;
 		}
@@ -51,7 +54,7 @@ SWS_echo_interation(int connfd)
 			if (errno == EINTR) {
 				continue;
 			}
-			SWS_log_error("[%s:%d] read error: %s", __FILE__, 
+			SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
 					__LINE__, strerror(errno));		
 			goto end;
 		} 
@@ -63,11 +66,11 @@ SWS_echo_interation(int connfd)
 		}
 		SWS_wbuf->loc += SWS_buf->loc;
 		SWS_buf->loc = 0;
-		printf("server: %s\n", SWS_buf->addr);
+		printf("server: %s", SWS_buf->addr);
 	}
 
 end:
-	SWS_wthread_ctrl = 0;
+	SWS_rthread_ctrl = 0;
 	return;
 }
 
