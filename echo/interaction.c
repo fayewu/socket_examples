@@ -3,101 +3,72 @@
 #include "socket.h"
 #include "interaction.h"
 
-static int SWS_connfd;
-static struct SWS_buf_t *SWS_buf;
-static struct SWS_buf_t *SWS_wbuf;
-
-static int SWS_wthread_ctrl = 1;
-static int SWS_rthread_ctrl = 1;
-
-static void *SWS_write_thread(void *arg);
+static char SWS_buf[SWS_QUEUE_LEN][SWS_BUF_LEN];
 
 void
 SWS_echo_interation(int connfd)
 {	
-	int n;
-	pthread_t tid;
+	fd_set wset, rset;
+	int val, ret;
+	struct timeval tval;
 
-	SWS_buf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
-	SWS_buf->addr = (char *)malloc(SWS_BUF_LEN + 1);  
-	SWS_wbuf = (struct SWS_buf_t *)malloc(sizeof(struct SWS_buf_t));
-	SWS_wbuf->addr = (char *)malloc(SWS_BUF_LEN + 1);  
+	tval.tv_sec = SWS_RWTIME; 
+	tval.tv_usec = 0;
 
-	SWS_buf->loc = 0;
-	SWS_wbuf->loc = 0;
-	memset(SWS_buf->addr, 0, SWS_BUF_LEN + 1);
-	memset(SWS_wbuf->addr, 0, SWS_BUF_LEN + 1);
-
-	SWS_rthread_ctrl = 1;
-	SWS_wthread_ctrl = 1;
-
-	if (pthread_create(&tid, NULL, SWS_write_thread, NULL) < 0) {
-		SWS_log_error("[%s:%d] thread create error", __FILE__, __LINE__);	
+	if ((val = fcntl(connfd, F_GETFL, 0)) < 0) {
+		SWS_log_error("[%s:%d] fcntl error: %s", __FILE__,
+				__LINE__, strerror(errno));	
 	}
 	
-	while (SWS_rthread_ctrl) {
-		n = SWS_read(connfd, SWS_buf->addr, SWS_BUF_LEN);			
-
-		if (n == 0) {
-			SWS_log_info("[%s:%d] client terminated prematurely\n",
-					__FILE__, __LINE__);		
-			goto end;
-		}
-
-		if (n == SWS_TIMEOUT) {
-			SWS_log_info("[%s:%d] read/write time out, closing...\n",
-					__FILE__, __LINE__);	
-			goto end;
-		}
-
-		if ( n < 0) {
+	if (fcntl(sockfd, F_SETFL, val | O_NONBLOCK) < 0) {
+		SWS_log_error("[%s:%d] fcntl error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+	
+	FD_ZERO(&wset);
+	FD_ZERO(&rset);
+	FD_SET(connfd, &wset);
+	FD_SET(connfd, &rset);
+	for ( ;; ) {
+		if ((ret = select(connfd + 1, &set, &set, NULL, tval)) < 0) {
 			if (errno == EINTR) {
 				continue;
 			}
-			SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
-					__LINE__, strerror(errno));		
-			goto end;
-		} 
-
-		SWS_connfd = connfd;
-
-		if (SWS_BUF_LEN + 1 - SWS_buf->loc > 0) {
-			strcat(&SWS_wbuf->addr[SWS_wbuf->loc], SWS_buf->addr);			
+			SWS_log_error("[%s:%d] select error: %s ", 
+					__FILE__, __LINE__, strerror(errno));
+			return;
+		} else if (ret == 0) {
+			errno = ETIMEOUT;		
+			return;
 		}
-		SWS_wbuf->loc += SWS_buf->loc;
-		SWS_buf->loc = 0;
-		printf("server: %s", SWS_buf->addr);
-	}
 
-end:
-	SWS_wthread_ctrl = 0;
-	return;
-}
+		if (FD_ISSET(sockfd, &set)) {
+			n = SWS_read(connfd, , SWS_BUF_LEN);
 
-void *
-SWS_write_thread(void *arg)
-{
-	int n;
-
-	while (SWS_wthread_ctrl) {
-		while (SWS_wbuf->addr[0] != '\0') {
-			n = SWS_write(SWS_connfd, SWS_wbuf, SWS_wbuf->loc);
-			if (n == SWS_TIMEOUT) {
-				goto end;			
+			if (n == 0) {
+				SWS_log_info("[%s:%d] client terminated 
+					prematurely\n", __FILE__, __LINE__);		
+				FD_CLR(connfd, &rset);	
 			}
 
-			if (n < 0) {
+			if (n == SWS_TIMEOUT) {
+				SWS_log_info("[%s:%d] read/write time out, closing...\n",
+						__FILE__, __LINE__);	
+				FD_CLR(connfd, &wset);				
+			}
+
+			if ( n < 0) {
 				if (errno == EINTR) {
 					continue;
-				}	
-				goto end;
-			}
+				}
+				SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
+						__LINE__, strerror(errno));		
+			} 
 		}
-	}
 
-end:
-	SWS_rthread_ctrl = 0;	
-	return NULL;
+		if
+			
+	}
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 

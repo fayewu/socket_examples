@@ -12,7 +12,7 @@
 #include <netinet/tcp.h>
 
 #define SWS_CLIENT_NUM		4
-#define SWS_CONNECT_NUM		30
+#define SWS_CONNECT_NUM		50
 
 char line[1024] = {"hello\n"};
 
@@ -35,7 +35,8 @@ tcp_connect()
 
 	if (connect(connect_fd, (struct sockaddr *)&cliaddr, 
 				sizeof(cliaddr)) < 0) {
-		printf("connect error\n");
+		printf("[%s:%d]connect error: %s\n", __FILE__, __LINE__,
+				strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 

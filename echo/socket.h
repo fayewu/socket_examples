@@ -18,6 +18,8 @@
 #define SWS_WRITE_TIMEO		1
 #define SWS_TIMEOUT		-2
 
+#define SWS_RWTIME		20
+
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start();
 

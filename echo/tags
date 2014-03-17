@@ -32,12 +32,12 @@ SWS_addr	config.c	/^const char *SWS_addr;$/;"	v
 SWS_buf	interaction.c	/^static struct SWS_buf_t *SWS_buf;$/;"	v	typeref:struct:SWS_buf_t	file:
 SWS_buf_t	interaction.h	/^struct SWS_buf_t {$/;"	s
 SWS_connfd	interaction.c	/^static int SWS_connfd;$/;"	v	file:
+SWS_cpu_time	deal_connect.c	/^SWS_cpu_time()$/;"	f
 SWS_echo_interation	interaction.c	/^SWS_echo_interation(int connfd)$/;"	f
 SWS_error_log	config.c	/^const char *SWS_error_log;$/;"	v
 SWS_get_config	config.c	/^SWS_get_config()$/;"	f
 SWS_handler_t	SWS.h	/^typedef void (*SWS_handler_t)(int signo); $/;"	t
 SWS_listen	socket.c	/^SWS_listen(const int port, const char *address)$/;"	f
-SWS_listen_fd	socket.c	/^int SWS_listen_fd;$/;"	v
 SWS_lock_init	deal_connect.c	/^SWS_lock_init()$/;"	f
 SWS_lock_release	deal_connect.c	/^SWS_lock_release()$/;"	f
 SWS_lock_wait	deal_connect.c	/^SWS_lock_wait()$/;"	f
@@ -103,14 +103,10 @@ count	deal_connect.h	/^	int count;$/;"	m	struct:SWS_worker_t
 err_exit	utils.c	/^err_exit(const char *str)$/;"	f
 err_exit1	utils.c	/^err_exit1(const char *format, ...)$/;"	f
 err_info	utils.c	/^err_info(const char *str)$/;"	f
-foo	test.c	/^foo()$/;"	f
-foo1	test.c	/^foo1()$/;"	f
 free	memory_poll.h	/^	struct memory_unit *free;$/;"	m	struct:memory_poll_block	typeref:struct:memory_poll_block::memory_unit
 handler	SWS.h	/^	SWS_handler_t handler;$/;"	m	struct:SWS_sig_t
 loc	interaction.h	/^	int loc;$/;"	m	struct:SWS_buf_t
 main	SWS.c	/^main(int argc, char *argv[])$/;"	f
-main	test.c	/^main()$/;"	f
-main	test_mpoll.c	/^main()$/;"	f
 memory_malloc	memory_poll.c	/^memory_malloc(size_t size)$/;"	f
 memory_poll_block	memory_poll.h	/^struct memory_poll_block {$/;"	s
 memory_poll_free	memory_poll.c	/^memory_poll_free()$/;"	f
@@ -121,7 +117,6 @@ next	memory_poll.h	/^	struct memory_poll_block *next;$/;"	m	struct:memory_poll_b
 pid	deal_connect.h	/^	pid_t pid;$/;"	m	struct:SWS_worker_t
 signo	SWS.h	/^	int signo;	$/;"	m	struct:SWS_sig_t
 size	memory_poll.h	/^	size_t size;$/;"	m	struct:memory_unit
-sock	test/get_status.py	/^sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)$/;"	v
 user_exit	utils.c	/^user_exit(const char *str)$/;"	f
 user_exit1	utils.c	/^user_exit1(const char *format, ...)$/;"	f
 user_info	utils.c	/^user_info(const char *str)$/;"	f

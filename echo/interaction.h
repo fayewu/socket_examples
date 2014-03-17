@@ -2,12 +2,14 @@
 #define _INTERACTION_H
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <string.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <pthread.h>
 
 #define SWS_BUF_LEN				1024
+#define	SWS_QUEUE_LEN				100 
 
 struct SWS_buf_t {
 	char *addr;

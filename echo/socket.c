@@ -3,7 +3,6 @@
 #include "socket.h"
 #include "interaction.h"
 
-static int SWS_rwtime = 10;
 static int SWS_timeout(int fd, int sec, int rwflag);
 
 int
@@ -193,7 +192,7 @@ SWS_read(int fd, void *vptr, size_t maxlen)
 	char *sptr;
 
 	while (True) {
-		ret = SWS_timeout(fd, SWS_rwtime, SWS_READ_TIMEO);	
+		ret = SWS_timeout(fd, SWS_RWTIME, SWS_READ_TIMEO);	
 
 		if (ret < 0) {
 			if (errno == EINTR) {
