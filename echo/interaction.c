@@ -17,7 +17,7 @@ SWS_echo_interation(int connfd)
 	tval.tv_sec = SWS_RWTIME; 
 	tval.tv_usec = 0;
 
-	memset(SWS_buf, 0, sizeof(struct SWS_buf_t));
+	memset(SWS_buf->buf, 0, SWS_BUF_LEN);
 	SWS_buf->start = SWS_buf->buf;
 	SWS_buf->end = SWS_buf->buf;
 
@@ -56,7 +56,7 @@ SWS_echo_interation(int connfd)
 
 		if (FD_ISSET(connfd, &rset)) {
 			printf("hello\n");
-			n = read(connfd, &SWS_buf->start, 
+			n = read(connfd, SWS_buf->start, 
 					&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end);
 
 			if (n == 0) {
@@ -78,11 +78,14 @@ SWS_echo_interation(int connfd)
 				return;
 			} 
 
+//			char *tmp;
+//			for ()
+
 			SWS_buf->end += n;
 		}
 
 		if (FD_ISSET(connfd, &wset)) {
-			n = write(connfd, &SWS_buf->start, 
+			n = write(connfd, SWS_buf->start, 
 					&SWS_buf->end - &SWS_buf->start);	
 
 			if (n < 0 && errno != EWOULDBLOCK) {
