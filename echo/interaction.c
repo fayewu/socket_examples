@@ -3,34 +3,46 @@
 #include "socket.h"
 #include "interaction.h"
 
-static char SWS_buf[SWS_QUEUE_LEN][SWS_BUF_LEN];
+static struct SWS_buf_t *SWS_buf; 
 
 void
 SWS_echo_interation(int connfd)
 {	
 	fd_set wset, rset;
-	int val, ret;
 	struct timeval tval;
+	struct SWS_buf_t tmp;
+	int n, val, ret, end_flag = 0;
 
+	SWS_buf = &tmp;
 	tval.tv_sec = SWS_RWTIME; 
 	tval.tv_usec = 0;
+
+	memset(SWS_buf, 0, sizeof(struct SWS_buf_t));
+	SWS_buf->start = SWS_buf->buf;
+	SWS_buf->end = SWS_buf->buf;
 
 	if ((val = fcntl(connfd, F_GETFL, 0)) < 0) {
 		SWS_log_error("[%s:%d] fcntl error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
 	
-	if (fcntl(sockfd, F_SETFL, val | O_NONBLOCK) < 0) {
+	if (fcntl(connfd, F_SETFL, val | O_NONBLOCK) < 0) {
 		SWS_log_error("[%s:%d] fcntl error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
 	
-	FD_ZERO(&wset);
-	FD_ZERO(&rset);
-	FD_SET(connfd, &wset);
-	FD_SET(connfd, &rset);
 	for ( ;; ) {
-		if ((ret = select(connfd + 1, &set, &set, NULL, tval)) < 0) {
+		FD_ZERO(&wset);
+		FD_ZERO(&rset);
+		if (end_flag == 0 && 
+				&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end > 0) {
+			FD_SET(connfd, &rset);
+		}
+		if (SWS_buf->start != SWS_buf->end) {
+			FD_SET(connfd, &wset);
+		}
+
+		if ((ret = select(connfd + 1, &rset, &wset, NULL, NULL)) < 0) {
 			if (errno == EINTR) {
 				continue;
 			}
@@ -38,35 +50,58 @@ SWS_echo_interation(int connfd)
 					__FILE__, __LINE__, strerror(errno));
 			return;
 		} else if (ret == 0) {
-			errno = ETIMEOUT;		
+			errno = ETIMEDOUT;		
 			return;
 		}
 
-		if (FD_ISSET(sockfd, &set)) {
-			n = SWS_read(connfd, , SWS_BUF_LEN);
+		if (FD_ISSET(connfd, &rset)) {
+			printf("hello\n");
+			n = read(connfd, &SWS_buf->start, 
+					&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end);
 
 			if (n == 0) {
-				SWS_log_info("[%s:%d] client terminated 
-					prematurely\n", __FILE__, __LINE__);		
+				SWS_log_info("[%s:%d] client terminated prematurely\n",
+						__FILE__, __LINE__);		
 				FD_CLR(connfd, &rset);	
+				end_flag = 1;
 			}
 
-			if (n == SWS_TIMEOUT) {
-				SWS_log_info("[%s:%d] read/write time out, closing...\n",
-						__FILE__, __LINE__);	
-				FD_CLR(connfd, &wset);				
-			}
+//			if (n == SWS_TIMEOUT) {
+//				SWS_log_info("[%s:%d] read/write time out, closing...\n",
+//						__FILE__, __LINE__);	
+//				FD_CLR(connfd, &wset);				
+//			}
 
-			if ( n < 0) {
-				if (errno == EINTR) {
-					continue;
-				}
+			if (n < 0 && errno != EWOULDBLOCK) {
 				SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
 						__LINE__, strerror(errno));		
+				return;
 			} 
+
+			SWS_buf->end += n;
+
+			char *i;
+			for (i = SWS_buf->start; i != SWS_buf->end; i++) {
+				printf("%c", *i);
+			}
+			printf("\n");
 		}
 
-		if
+		if (FD_ISSET(connfd, &wset)) {
+			n = write(connfd, &SWS_buf->start, 
+					&SWS_buf->end - &SWS_buf->start);	
+
+			if (n < 0 && errno != EWOULDBLOCK) {
+				SWS_log_error("[%s:%d] write error: %s\n", 
+					__FILE__, __LINE__, strerror(errno));		
+			}
+			
+			SWS_buf->start += n;
+
+			if ((SWS_buf->start == SWS_buf->end) && end_flag) {
+				return;		
+			}
+		}
 			
 	}
 }

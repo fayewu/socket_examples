@@ -8,14 +8,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define SWS_BUF_LEN				1024
+#define SWS_BUF_LEN				2048
 #define	SWS_QUEUE_LEN				100 
 
 struct SWS_buf_t {
-	char *addr;
-	int loc;
+	char buf[SWS_BUF_LEN];
+	char *start;
+	char *end;
 };
-
 
 extern void SWS_echo_interation();
 
