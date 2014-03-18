@@ -83,9 +83,8 @@ SWS_echo_interation(int connfd)
 
 		if (FD_ISSET(connfd, &wset)) {
 			n = write(connfd, SWS_buf->start, 
-					&SWS_buf->end - &SWS_buf->start);	
+					SWS_buf->end - SWS_buf->start);	
 			
-		//	printf("%d\n", n);
 //			char *tmp;
 //			for (tmp = SWS_buf->start; tmp != SWS_buf->end; tmp++) {
 //				printf("%c", *tmp);

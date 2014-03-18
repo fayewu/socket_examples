@@ -12,7 +12,7 @@
 #include <netinet/tcp.h>
 
 #define SWS_CLIENT_NUM		4
-#define SWS_CONNECT_NUM		30
+#define SWS_CONNECT_NUM		50
 
 char line[1024] = {"hello\n"};
 
