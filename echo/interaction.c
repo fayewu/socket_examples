@@ -55,7 +55,6 @@ SWS_echo_interation(int connfd)
 		}
 
 		if (FD_ISSET(connfd, &rset)) {
-			printf("hello\n");
 			n = read(connfd, SWS_buf->start, 
 					&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end);
 
@@ -79,13 +78,19 @@ SWS_echo_interation(int connfd)
 				return;
 			} 
 
-
 			SWS_buf->end += n;
 		}
 
-			if (FD_ISSET(connfd, &wset)) {
+		if (FD_ISSET(connfd, &wset)) {
 			n = write(connfd, SWS_buf->start, 
 					&SWS_buf->end - &SWS_buf->start);	
+			
+		//	printf("%d\n", n);
+//			char *tmp;
+//			for (tmp = SWS_buf->start; tmp != SWS_buf->end; tmp++) {
+//				printf("%c", *tmp);
+//			}
+//			printf("\n");
 
 			if (n < 0 && errno != EWOULDBLOCK) {
 				SWS_log_error("[%s:%d] write error: %s\n", 
@@ -384,7 +389,6 @@ SWS_echo_interation(int connfd)
 //
 //int
 //SWS_parse_request_header(void *header, int len, struct SWS_request_t **req,
-//		struct SWS_connect_t **con)
 //{
 ////	int ret
 ////	void *start = header, end;

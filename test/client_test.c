@@ -12,7 +12,7 @@
 #include <netinet/tcp.h>
 
 #define SWS_CLIENT_NUM		4
-#define SWS_CONNECT_NUM		50
+#define SWS_CONNECT_NUM		30
 
 char line[1024] = {"hello\n"};
 
@@ -43,39 +43,39 @@ tcp_connect()
 	return connect_fd;
 }
 
-void
-SWS_write(int fd, void *ptr, size_t maxlen)
-{
-again:	if (write(fd, ptr, maxlen) < 0) {
-		if (errno == EINTR) {
-			goto again;
-		}
-		printf("[%s:%d] write error\n", __FILE__, __LINE__);
-	}	
-}
-
-void
-SWS_read(int fd, void *ptr, size_t maxlen)
-{
-	int n;
-
-again:	n = read(fd, ptr, maxlen);
-	if (n == 0) {
-		printf("[%s:%d] client terminated prematurely",
-				__FILE__, __LINE__);		
-	} else if (n < 0) {
-		if (errno == EINTR) {
-			goto again;
-		}
-		printf("[%s:%d] read error: %s", __FILE__, 
-				__LINE__, strerror(errno));		
-	}
-}
+//void
+//SWS_write(int fd, void *ptr, size_t maxlen)
+//{
+//again:	if (write(fd, ptr, maxlen) < 0) {
+//		if (errno == EINTR) {
+//			goto again;
+//		}
+//		printf("[%s:%d] write error\n", __FILE__, __LINE__);
+//	}	
+//}
+//
+//void
+//SWS_read(int fd, void *ptr, size_t maxlen)
+//{
+//	int n;
+//
+//again:	n = read(fd, ptr, maxlen);
+//	if (n == 0) {
+//		printf("[%s:%d] client terminated prematurely",
+//				__FILE__, __LINE__);		
+//	} else if (n < 0) {
+//		if (errno == EINTR) {
+//			goto again;
+//		}
+//		printf("[%s:%d] read error: %s", __FILE__, 
+//				__LINE__, strerror(errno));		
+//	}
+//}
 
 int
 main(int argc, char *argv[])
 {
-	int i, j, fd;
+	int i, j, fd, n;
 	pid_t pid;	
 
 	for (i = 0; i < SWS_CLIENT_NUM; i++) {
@@ -88,10 +88,12 @@ main(int argc, char *argv[])
 				fd = tcp_connect();		
 				char recvline[1024] = {0};
 				
-				write(fd, line, strlen(line));	
+				n = write(fd, line, strlen(line));	
+//				printf("%d\n", n);
 				if (read(fd, recvline, 1024) < 0) {
 					exit(EXIT_FAILURE);
 				}
+				printf("%s\n", recvline);
 				close(fd);
 			}	
 			exit(EXIT_SUCCESS);

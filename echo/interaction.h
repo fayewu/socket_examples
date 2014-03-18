@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#define SWS_BUF_LEN				2048
+#define SWS_BUF_LEN				10240
 #define	SWS_QUEUE_LEN				100 
 
 struct SWS_buf_t {
