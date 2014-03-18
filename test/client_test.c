@@ -86,8 +86,12 @@ main(int argc, char *argv[])
 		if (pid == 0) {
 			for (j = 0; j < SWS_CONNECT_NUM; j++) {
 				fd = tcp_connect();		
+				char recvline[1024] = {0};
 				
-				SWS_write(fd, line, strlen(line));	
+				write(fd, line, strlen(line));	
+				if (read(fd, recvline, 1024) < 0) {
+					exit(EXIT_FAILURE);
+				}
 				close(fd);
 			}	
 			exit(EXIT_SUCCESS);

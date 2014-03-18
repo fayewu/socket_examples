@@ -62,6 +62,7 @@ SWS_echo_interation(int connfd)
 			if (n == 0) {
 				SWS_log_info("[%s:%d] client terminated prematurely\n",
 						__FILE__, __LINE__);		
+				return;
 				FD_CLR(connfd, &rset);	
 				end_flag = 1;
 			}
@@ -78,13 +79,11 @@ SWS_echo_interation(int connfd)
 				return;
 			} 
 
-//			char *tmp;
-//			for ()
 
 			SWS_buf->end += n;
 		}
 
-		if (FD_ISSET(connfd, &wset)) {
+			if (FD_ISSET(connfd, &wset)) {
 			n = write(connfd, SWS_buf->start, 
 					&SWS_buf->end - &SWS_buf->start);	
 
