@@ -56,15 +56,14 @@ SWS_echo_interation(int connfd)
 
 		for (i = 0; i < nfds; i++) {
 			if (events[i].event & EPOLLIN) {
-				
+				SWS_read(events[i].data.fd);
 			} else if (events[i].event & EPOLLOUT) {
-				
+				SWS_write(events[i].data.fd);		
 			}	
 		}
 	}
+}
 		
-	
-
 //	for ( ;; ) {
 //		FD_ZERO(&wset);
 //		FD_ZERO(&rset);
@@ -138,7 +137,7 @@ SWS_echo_interation(int connfd)
 //		}
 //			
 //	}
-}
+//}
 
 //static void SWS_connect_init(struct SWS_request_t **request, 
 //		struct SWS_connect_t **connect);

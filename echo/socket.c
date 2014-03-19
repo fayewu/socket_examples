@@ -185,45 +185,51 @@ SWS_timeout(int fd, int sec, int rwflag)
 	return select(fd + 1, &rset, NULL, NULL, &tv);
 }
 
-ssize_t
-SWS_read(int fd, void *vptr, size_t maxlen)
+void
+SWS_read(int fd)
 {
-	int n, ret;
-	char *sptr;
-
-	while (True) {
-		ret = SWS_timeout(fd, SWS_RWTIME, SWS_READ_TIMEO);	
-
-		if (ret < 0) {
-			if (errno == EINTR) {
-				continue;	
-			}
-		}
-
-		if (ret == 0) {
-			return SWS_TIMEOUT;	
-		}
-
-		break;
-	}
-
-again:	
-	n = read(fd, vptr, maxlen);
-
-	if ( n <= 0) {
-		return n;
-	} else {
-		sptr = vptr;
-		if (*(sptr + n - 1) != '\n') {
-			vptr += n;
-			goto again;
-		}			
-		return n;
-	}
+	
 }
 
-ssize_t
-SWS_write(int fd, void *vptr, size_t maxlen)
-{
-	return write(fd, vptr, maxlen);	
-}
+//ssize_t
+//SWS_read(int fd, void *vptr, size_t maxlen)
+//{
+//	int n, ret;
+//	char *sptr;
+//
+//	while (True) {
+//		ret = SWS_timeout(fd, SWS_RWTIME, SWS_READ_TIMEO);	
+//
+//		if (ret < 0) {
+//			if (errno == EINTR) {
+//				continue;	
+//			}
+//		}
+//
+//		if (ret == 0) {
+//			return SWS_TIMEOUT;	
+//		}
+//
+//		break;
+//	}
+//
+//again:	
+//	n = read(fd, vptr, maxlen);
+//
+//	if ( n <= 0) {
+//		return n;
+//	} else {
+//		sptr = vptr;
+//		if (*(sptr + n - 1) != '\n') {
+//			vptr += n;
+//			goto again;
+//		}			
+//		return n;
+//	}
+//}
+//
+//ssize_t
+//SWS_write(int fd, void *vptr, size_t maxlen)
+//{
+//	return write(fd, vptr, maxlen);	
+//}
