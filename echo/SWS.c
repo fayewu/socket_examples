@@ -31,7 +31,9 @@ SWS_sig_handler(int signo)
 int
 main(int argc, char *argv[])
 {
-	int i;
+	int i, status;
+	pid_t pid;
+	sigset_t newset, oldset, zeroset; 
 	struct sigaction sa;
 	
 	SWS_log_init();
@@ -49,13 +51,25 @@ main(int argc, char *argv[])
 
 	SWS_web_start();
 
+	sigemptyset(&newset);
+	sigemptyset(&zeroset);
+	sigaddset(&newset, SIGINT);
+	sigaddset(&newset, SIGCHLD);
+
+	if (sigprocmask(SIG_BLOCK, &newset, &oldset) < 0) {
+		SWS_log_error("[%s:%d] sigprocmask set error: %s", __FILE__,
+				__LINE__);	
+	}
+
 	for ( ;; ) {
+		sigsuspend(&zeroset);
+
 		if (SWS_sig_quit) {
 			SWS_worker_exit();			
 			exit(EXIT_SUCCESS);
 		}
 		if (SWS_sig_child) {
-			SWS_wait_worker();			
+			SWS_wait_worker();
 		}
 	}
 
