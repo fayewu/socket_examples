@@ -11,7 +11,8 @@ SWS_echo_interation(int connfd)
 	fd_set wset, rset;
 	struct timeval tval;
 	struct SWS_buf_t tmp;
-	int n, val, ret, end_flag = 0;
+	struct epoll_event *events, ev;
+	int n, i, val, ret, end_flag = 0, epollfd, nfds;
 
 	SWS_buf = &tmp;
 	tval.tv_sec = SWS_RWTIME; 
@@ -30,80 +31,113 @@ SWS_echo_interation(int connfd)
 		SWS_log_error("[%s:%d] fcntl error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
-	
-	for ( ;; ) {
-		FD_ZERO(&wset);
-		FD_ZERO(&rset);
-		if (end_flag == 0 && 
-				&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end > 0) {
-			FD_SET(connfd, &rset);
-		}
-		if (SWS_buf->start != SWS_buf->end) {
-			FD_SET(connfd, &wset);
-		}
-
-		if ((ret = select(connfd + 1, &rset, &wset, NULL, NULL)) < 0) {
-			if (errno == EINTR) {
-				continue;
-			}
-			SWS_log_error("[%s:%d] select error: %s ", 
-					__FILE__, __LINE__, strerror(errno));
-			return;
-		} else if (ret == 0) {
-			errno = ETIMEDOUT;		
-			return;
-		}
-
-		if (FD_ISSET(connfd, &rset)) {
-			n = read(connfd, SWS_buf->start, 
-					&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end);
-
-			if (n == 0) {
-				SWS_log_info("[%s:%d] client terminated prematurely\n",
-						__FILE__, __LINE__);		
-				return;
-				FD_CLR(connfd, &rset);	
-				end_flag = 1;
-			}
-
-//			if (n == SWS_TIMEOUT) {
-//				SWS_log_info("[%s:%d] read/write time out, closing...\n",
-//						__FILE__, __LINE__);	
-//				FD_CLR(connfd, &wset);				
-//			}
-
-			if (n < 0 && errno != EWOULDBLOCK) {
-				SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
-						__LINE__, strerror(errno));		
-				return;
-			} 
-
-			SWS_buf->end += n;
-		}
-
-		if (FD_ISSET(connfd, &wset)) {
-			n = write(connfd, SWS_buf->start, 
-					SWS_buf->end - SWS_buf->start);	
-			
-//			char *tmp;
-//			for (tmp = SWS_buf->start; tmp != SWS_buf->end; tmp++) {
-//				printf("%c", *tmp);
-//			}
-//			printf("\n");
-
-			if (n < 0 && errno != EWOULDBLOCK) {
-				SWS_log_error("[%s:%d] write error: %s\n", 
-					__FILE__, __LINE__, strerror(errno));		
-			}
-			
-			SWS_buf->start += n;
-
-			if ((SWS_buf->start == SWS_buf->end) && end_flag) {
-				return;		
-			}
-		}
-			
+		
+	epollfd = epoll_create(10);
+	if (epollfd < 0) {
+		SWS_log_error("[%s:%d] epoll create error: %s", __FILE__,
+				__LINE__, strerror(errno));	
 	}
+	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+	ev.data.fd = connfd;  
+
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, connfd, &ev) < 0) {
+		SWS_log_error("[%s:%d] epoll ctl error: %s", __FILE__,
+				__LINE__, strerror(errno));	
+	}
+
+	events = malloc(SWS_MAXEVENTS * sizeof (struct epoll_event));
+
+	for ( ;; ) {
+		nfds = epoll_wait(epollfd, events, SWS_MAXEVENTS, -1);
+		if (nfds == -1) {
+			SWS_log_error("[%s:%d] epoll wait error: %s", __FILE__,
+					__LINE__, strerror(errno));	
+		}
+
+		for (i = 0; i < nfds; i++) {
+			if (events[i].event & EPOLLIN) {
+				
+			} else if (events[i].event & EPOLLOUT) {
+				
+			}	
+		}
+	}
+		
+	
+
+//	for ( ;; ) {
+//		FD_ZERO(&wset);
+//		FD_ZERO(&rset);
+//		if (end_flag == 0 && 
+//				&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end > 0) {
+//			FD_SET(connfd, &rset);
+//		}
+//		if (SWS_buf->start != SWS_buf->end) {
+//			FD_SET(connfd, &wset);
+//		}
+//
+//		if ((ret = select(connfd + 1, &rset, &wset, NULL, NULL)) < 0) {
+//			if (errno == EINTR) {
+//				continue;
+//			}
+//			SWS_log_error("[%s:%d] select error: %s ", 
+//					__FILE__, __LINE__, strerror(errno));
+//			return;
+//		} else if (ret == 0) {
+//			errno = ETIMEDOUT;		
+//			return;
+//		}
+//
+//		if (FD_ISSET(connfd, &rset)) {
+//			n = read(connfd, SWS_buf->start, 
+//					&SWS_buf->buf[SWS_BUF_LEN] - SWS_buf->end);
+//
+//			if (n == 0) {
+//				SWS_log_info("[%s:%d] client terminated prematurely\n",
+//						__FILE__, __LINE__);		
+//				return;
+//				FD_CLR(connfd, &rset);	
+//				end_flag = 1;
+//			}
+//
+////			if (n == SWS_TIMEOUT) {
+////				SWS_log_info("[%s:%d] read/write time out, closing...\n",
+////						__FILE__, __LINE__);	
+////				FD_CLR(connfd, &wset);				
+////			}
+//
+//			if (n < 0 && errno != EWOULDBLOCK) {
+//				SWS_log_error("[%s:%d] read error: %s\n", __FILE__, 
+//						__LINE__, strerror(errno));		
+//				return;
+//			} 
+//
+//			SWS_buf->end += n;
+//		}
+//
+//		if (FD_ISSET(connfd, &wset)) {
+//			n = write(connfd, SWS_buf->start, 
+//					SWS_buf->end - SWS_buf->start);	
+//			
+////			char *tmp;
+////			for (tmp = SWS_buf->start; tmp != SWS_buf->end; tmp++) {
+////				printf("%c", *tmp);
+////			}
+////			printf("\n");
+//
+//			if (n < 0 && errno != EWOULDBLOCK) {
+//				SWS_log_error("[%s:%d] write error: %s\n", 
+//					__FILE__, __LINE__, strerror(errno));		
+//			}
+//			
+//			SWS_buf->start += n;
+//
+//			if ((SWS_buf->start == SWS_buf->end) && end_flag) {
+//				return;		
+//			}
+//		}
+//			
+//	}
 }
 
 //static void SWS_connect_init(struct SWS_request_t **request, 

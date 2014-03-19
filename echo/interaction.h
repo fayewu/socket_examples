@@ -6,10 +6,13 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/stat.h>
+#include <sys/epoll.h>
 #include <sys/types.h>
 
 #define SWS_BUF_LEN				10240
 #define	SWS_QUEUE_LEN				100 
+
+#define SWS_MAXEVENTS				10
 
 struct SWS_buf_t {
 	char buf[SWS_BUF_LEN];
