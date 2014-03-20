@@ -185,10 +185,54 @@ SWS_timeout(int fd, int sec, int rwflag)
 	return select(fd + 1, &rset, NULL, NULL, &tv);
 }
 
-void
-SWS_read(int fd)
+int
+SWS_read(int fd, struct SWS_buf_t **b)
 {
-	
+	int n;
+	struct SWS_buf_t *buf = *b;
+
+	while (1) {
+		n = read(fd, buf->start, &buf->buf[SWS_BUF_LEN] - buf->start);	
+
+		if (n < 0) {
+			if (errno == EWOULDBLOCK) {
+				return SWS_READED;				
+			}
+			SWS_log_error("[%s:%d] read error: %s\n", __FILE__,
+					__LINE__, strerror(errno));
+			return SWS_CLOSE;
+		}
+
+		if (n == 0) {
+			SWS_log_info("[%s:%d] client terminated prematurely\n",
+					__FILE__, __LINE__);		
+			return SWS_CLOSE;
+		}
+
+		buf->end += n;
+	}	
+}
+
+int
+SWS_write(int fd, struct SWS_buf_t **b)
+{
+	int n;	
+	struct SWS_buf_t *buf = *b;
+
+	while (1) {
+		n = write(fd, buf->start, buf->end - buf->start);	
+
+		if (n < 0) {
+			if (errno == EWOULDBLOCK) {
+				return SWS_WRITED;				
+			}
+			SWS_log_error("[%s:%d] write error: %s\n", __FILE__,
+					__LINE__, strerror(errno));
+			return SWS_CLOSE;
+		}
+
+		buf->start += n;
+	}	
 }
 
 //ssize_t

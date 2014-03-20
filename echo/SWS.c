@@ -31,8 +31,7 @@ SWS_sig_handler(int signo)
 int
 main(int argc, char *argv[])
 {
-	int i, status;
-	pid_t pid;
+	int i;
 	sigset_t newset, oldset, zeroset; 
 	struct sigaction sa;
 	

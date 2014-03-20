@@ -22,6 +22,8 @@ struct SWS_buf_t {
 
 extern void SWS_echo_interation();
 
+extern int SWS_end_flag;  
+
 //#define SWS_HEADER_LEN			1024				/* 预读1k */
 //#define SWS_WEB_ROOT_LEN		sizeof(SWS_web_root) + 1
 //#define SWS_STATUS_LEN			50

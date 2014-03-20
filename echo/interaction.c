@@ -3,20 +3,17 @@
 #include "socket.h"
 #include "interaction.h"
 
+int SWS_end_flag = 0;
 static struct SWS_buf_t *SWS_buf; 
 
 void
 SWS_echo_interation(int connfd)
 {	
-	fd_set wset, rset;
-	struct timeval tval;
 	struct SWS_buf_t tmp;
 	struct epoll_event *events, ev;
-	int n, i, val, ret, end_flag = 0, epollfd, nfds;
+	int i, val, epollfd, nfds;
 
 	SWS_buf = &tmp;
-	tval.tv_sec = SWS_RWTIME; 
-	tval.tv_usec = 0;
 
 	memset(SWS_buf->buf, 0, SWS_BUF_LEN);
 	SWS_buf->start = SWS_buf->buf;
@@ -37,7 +34,7 @@ SWS_echo_interation(int connfd)
 		SWS_log_error("[%s:%d] epoll create error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
-	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+	ev.events = EPOLLIN | EPOLLET;
 	ev.data.fd = connfd;  
 
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, connfd, &ev) < 0) {
@@ -55,10 +52,21 @@ SWS_echo_interation(int connfd)
 		}
 
 		for (i = 0; i < nfds; i++) {
-			if (events[i].event & EPOLLIN) {
-				SWS_read(events[i].data.fd);
-			} else if (events[i].event & EPOLLOUT) {
-				SWS_write(events[i].data.fd);		
+			if (events[i].events & EPOLLIN) {
+				printf("hello\n");
+				if (SWS_read(connfd, &SWS_buf) == SWS_CLOSE) {
+					return;
+				}
+				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
+
+			} else if (events[i].events & EPOLLOUT) {
+				if (SWS_write(connfd, &SWS_buf) == SWS_CLOSE) {
+					return;
+				}
+
+				ev.events = EPOLLIN | EPOLLET;
+				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
 			}	
 		}
 	}

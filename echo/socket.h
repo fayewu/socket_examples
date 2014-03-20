@@ -14,17 +14,23 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 
+#include "interaction.h"
+
 #define SWS_READ_TIMEO		0
 #define SWS_WRITE_TIMEO		1
 #define SWS_TIMEOUT		-2
 
 #define SWS_RWTIME		20
 
+#define	SWS_READED		-1
+#define SWS_CLOSE		0
+#define SWS_WRITED		-1
+
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start();
 
-extern ssize_t SWS_read(int fd, void *ptr, size_t maxlen); 
-extern ssize_t SWS_write(int fd, void *ptr, size_t maxlen);
+extern int SWS_read(int fd, struct SWS_buf_t **buf); 
+extern int SWS_write(int fd, struct SWS_buf_t **buf);
 
 //extern ssize_t SWS_read_request_line(int fd, void *ptr, size_t maxlen);
 //extern ssize_t SWS_read_header(int fd, void *ptr, size_t maxlen);
