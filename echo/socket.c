@@ -231,6 +231,10 @@ SWS_write(int fd, struct SWS_buf_t **b)
 			return SWS_CLOSE;
 		}
 
+		if (buf->start == buf->end) {
+			return SWS_CLOSE;
+		}
+
 		buf->start += n;
 	}	
 }

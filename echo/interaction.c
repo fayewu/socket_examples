@@ -34,7 +34,7 @@ SWS_echo_interation(int connfd)
 		SWS_log_error("[%s:%d] epoll create error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
-	ev.events = EPOLLIN | EPOLLET;
+	ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
 	ev.data.fd = connfd;  
 
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, connfd, &ev) < 0) {
@@ -53,21 +53,31 @@ SWS_echo_interation(int connfd)
 
 		for (i = 0; i < nfds; i++) {
 			if (events[i].events & EPOLLIN) {
-				printf("hello\n");
 				if (SWS_read(connfd, &SWS_buf) == SWS_CLOSE) {
 					return;
 				}
-				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+				ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP;
 				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
+			} 
 
-			} else if (events[i].events & EPOLLOUT) {
+			if (events[i].events & EPOLLRDHUP) {
+				printf("hello\n");
+				return;
+			}
+
+			if (events[i].events & EPOLLOUT) {
 				if (SWS_write(connfd, &SWS_buf) == SWS_CLOSE) {
 					return;
 				}
 
-				ev.events = EPOLLIN | EPOLLET;
+				ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
 				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
-			}	
+			}
+
+//			} else if (events[i].events & EPOLLRDHUP) {
+//				printf("hello\n");
+//				return;		
+//			}
 		}
 	}
 }

@@ -89,7 +89,6 @@ main(int argc, char *argv[])
 				char recvline[1024] = {0};
 				
 				n = write(fd, line, strlen(line));	
-//				printf("%d\n", n);
 				if (read(fd, recvline, 1024) < 0) {
 					exit(EXIT_FAILURE);
 				}
