@@ -61,7 +61,6 @@ SWS_echo_interation(int connfd)
 			} 
 
 			if (events[i].events & EPOLLRDHUP) {
-				printf("hello\n");
 				return;
 			}
 
@@ -77,7 +76,7 @@ SWS_echo_interation(int connfd)
 		}
 	}
 }
-		
+
 //	for ( ;; ) {
 //		FD_ZERO(&wset);
 //		FD_ZERO(&rset);

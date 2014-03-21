@@ -78,33 +78,50 @@ main(int argc, char *argv[])
 	int i, j, fd, n;
 	pid_t pid;	
 
-	for (i = 0; i < SWS_CLIENT_NUM; i++) {
-		if ((pid = fork()) < 0) {
-			printf("[%s:%d] fork error", __FILE__, __LINE__);	
+	fd = tcp_connect();
+	for (i = 0; i < 500; i++) {
+		n = write(fd, line, strlen(line));	
+
+		if (n <= 0) {
+			printf("write error\n");
 			exit(EXIT_FAILURE);
 		}
-		if (pid == 0) {
-			for (j = 0; j < SWS_CONNECT_NUM; j++) {
-				fd = tcp_connect();		
-				char recvline[1024] = {0};
-				
-				n = write(fd, line, strlen(line));	
-				if (read(fd, recvline, 1024) < 0) {
-					exit(EXIT_FAILURE);
-				}
-				printf("%s\n", recvline);
-				close(fd);
-			}	
-			exit(EXIT_SUCCESS);
+		char recvline[1024] = {0};
+		if (read(fd, recvline, 1024) < 0) {
+			printf("read error\n");
+			exit(EXIT_FAILURE);	
 		}
+		printf("%s\n", recvline);
+		
 	}
-
-	while (wait(NULL) > 0) {
-			
-	}
-	if (errno != ECHILD) {
-		printf("[%s:%d] wait error", __FILE__, __LINE__);	
-	}
+	
+//	for (i = 0; i < SWS_CLIENT_NUM; i++) {
+//		if ((pid = fork()) < 0) {
+//			printf("[%s:%d] fork error", __FILE__, __LINE__);	
+//			exit(EXIT_FAILURE);
+//		}
+//		if (pid == 0) {
+//			for (j = 0; j < SWS_CONNECT_NUM; j++) {
+//				fd = tcp_connect();		
+//				char recvline[1024] = {0};
+//				
+//				n = write(fd, line, strlen(line));	
+//				if (read(fd, recvline, 1024) < 0) {
+//					exit(EXIT_FAILURE);
+//				}
+//				printf("%s\n", recvline);
+//				close(fd);
+//			}	
+//			exit(EXIT_SUCCESS);
+//		}
+//	}
+//
+//	while (wait(NULL) > 0) {
+//			
+//	}
+//	if (errno != ECHILD) {
+//		printf("[%s:%d] wait error", __FILE__, __LINE__);	
+//	}
 
 	return 0;
 }

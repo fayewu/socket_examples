@@ -232,7 +232,7 @@ SWS_write(int fd, struct SWS_buf_t **b)
 		}
 
 		if (buf->start == buf->end) {
-			return SWS_CLOSE;
+			return SWS_WRITED;
 		}
 
 		buf->start += n;
