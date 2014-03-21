@@ -74,10 +74,6 @@ SWS_echo_interation(int connfd)
 				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
 			}
 
-//			} else if (events[i].events & EPOLLRDHUP) {
-//				printf("hello\n");
-//				return;		
-//			}
 		}
 	}
 }

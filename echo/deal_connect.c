@@ -25,9 +25,6 @@ SWS_web_start()
 			PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);	
 	SWS_lock_init();
 
-//	for (i = 0; i < 1; i++) {
-//		SWS_worker[i].pid = SWS_worker_init(i, listenfd);	
-//	}
 	for (i = 0; i < SWS_process_num; i++) {	
 		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
 	}
