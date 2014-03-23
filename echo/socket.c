@@ -11,6 +11,7 @@ SWS_listen(const int port, const char *address)
 	char *ptr;
 	int optlen = 1;
 	int keep_idle = 5, keep_interval = 1, keep_count = 3; 
+	unsigned int timeout = 10000;
 	int listen_fd, backlog;
 	struct sockaddr_in servaddr;
 
@@ -52,6 +53,12 @@ SWS_listen(const int port, const char *address)
 		SWS_log_warn("[%s:%d] set tcp keepcnt error: %s", __FILE__,
 				__LINE__, strerror(errno));	
 	}
+	if (setsockopt(listen_fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout, 
+				sizeof(timeout)) < 0) {
+		SWS_log_warn("[%s:%d] set tcp user timeout option error: %s",
+				__FILE__, __LINE__, strerror(errno));
+	}
+	
 
 	if (bind(listen_fd, (struct sockaddr *)&servaddr,
 				sizeof(servaddr)) != 0) {
