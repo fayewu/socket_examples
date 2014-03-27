@@ -13,6 +13,8 @@
 #define	SWS_QUEUE_LEN				100 
 
 #define SWS_MAXEVENTS				10
+ 
+#define	WRITEEVENT		EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP 
 
 struct SWS_buf_t {
 	char buf[SWS_BUF_LEN];

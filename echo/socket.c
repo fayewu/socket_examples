@@ -235,7 +235,7 @@ SWS_write(int fd, struct SWS_buf_t **b)
 			}
 			SWS_log_error("[%s:%d] write error: %s\n", __FILE__,
 					__LINE__, strerror(errno));
-			return SWS_CLOSE;
+			return SWS_AGAIN;
 		}
 
 		if (buf->start == buf->end) {

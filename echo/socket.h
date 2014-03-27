@@ -25,6 +25,7 @@
 #define	SWS_READED		-1
 #define SWS_CLOSE		0
 #define SWS_WRITED		-1
+#define SWS_AGAIN		-2
 
 extern int SWS_listen(const int port, const char *address);
 extern void SWS_service_start();
