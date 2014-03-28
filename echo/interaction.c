@@ -63,7 +63,8 @@ SWS_echo_interation(int connfd)
 				}
 				if (ret == SWS_AGAIN) {
 					ev.events = WRITEEVENT;	
-					epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
+					epoll_ctl(epollfd, EPOLL_CTL_MOD, 
+							connfd, &ev);
 				}
 				
 			}	
@@ -79,29 +80,6 @@ SWS_echo_interation(int connfd)
 			}
 		}
 
-//		for (i = 0; i < nfds; i++) {
-//			if (events[i].events & EPOLLIN) {
-//				if (SWS_read(connfd, &SWS_buf) == SWS_CLOSE) {
-//					return;
-//				}
-//				ev.events = EPOLLIN | EPOLLOUT | EPOLLET | EPOLLRDHUP;
-//				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
-//			} 
-//
-//			if (events[i].events & EPOLLRDHUP) {
-//				return;
-//			}
-//
-//			if (events[i].events & EPOLLOUT) {
-//				if (SWS_write(connfd, &SWS_buf) == SWS_CLOSE) {
-//					return;
-//				}
-//
-//				ev.events = EPOLLIN | EPOLLET | EPOLLRDHUP;
-//				epoll_ctl(epollfd, EPOLL_CTL_MOD, connfd, &ev);
-//			}
-//
-//		}
 	}
 }
 

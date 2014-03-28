@@ -28,6 +28,9 @@ SWS_web_start()
 	for (i = 0; i < SWS_process_num; i++) {	
 		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
 	}
+//	for (i = 0; i < 1; i++) {	
+//		SWS_worker[i].pid = SWS_worker_init(i, listenfd);
+//	}
 }
 
 void

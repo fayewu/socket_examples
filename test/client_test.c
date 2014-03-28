@@ -78,7 +78,7 @@ main(int argc, char *argv[])
 	int i, j, fd, n;
 	pid_t pid;	
 
-	fd = tcp_connect();
+//	fd = tcp_connect();
 //	for (i = 0; i < 500; i++) {
 //		n = write(fd, line, strlen(line));	
 //
