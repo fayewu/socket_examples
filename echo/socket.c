@@ -202,8 +202,8 @@ SWS_read(int fd, struct SWS_buf_t **b)
 		n = read(fd, buf->start, &buf->buf[SWS_BUF_LEN] - buf->start);	
 
 		if (n < 0) {
-			if (errno == EWOULDBLOCK) {
-				return SWS_READED;				
+			if (errno == EAGAIN) {
+				return SWS_AGAIN;				
 			}
 			SWS_log_error("[%s:%d] read error: %s\n", __FILE__,
 					__LINE__, strerror(errno));
@@ -230,12 +230,12 @@ SWS_write(int fd, struct SWS_buf_t **b)
 		n = write(fd, buf->start, buf->end - buf->start);	
 
 		if (n < 0) {
-			if (errno == EWOULDBLOCK) {
-				return SWS_WRITED;				
+			if (errno == EAGAIN) {
+				return errno;				
 			}
 			SWS_log_error("[%s:%d] write error: %s\n", __FILE__,
 					__LINE__, strerror(errno));
-			return SWS_AGAIN;
+			return errno;
 		}
 
 		if (buf->start == buf->end) {

@@ -22,7 +22,6 @@
 
 #define SWS_RWTIME		20
 
-#define	SWS_READED		-1
 #define SWS_CLOSE		0
 #define SWS_WRITED		-1
 #define SWS_AGAIN		-2
